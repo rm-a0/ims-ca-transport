@@ -12,7 +12,7 @@
 class Cell {
 public:
     /**
-     * @brief Constructor for Cell class
+     * @brief Constructor for the Cell class
      * @param state Initial cell state
      */
     Cell(bool state = false);
