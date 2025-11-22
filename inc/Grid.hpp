@@ -8,6 +8,7 @@
 #include "Cell.hpp"
 #include "Rules.hpp"
 #include <vector>
+#include <fstream>
 
 /**
  * @class Grid
@@ -36,6 +37,21 @@ public:
      */
     int countAliveNeighbors(int x, int y) const;
 
+    /**
+     * @brief Export grid into a PPM file
+     * @param filename Name of the file
+     * @param scale Pixel scale factor
+     */
+    void exportPPM(const std::string& filename, int scale) const;
+
+    /**
+     * @brief Gets cell at (x, y)
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @return Cell at set coordinate
+     */
+    Cell& getCell(int x, int y) { return cells[x][y]; }
+    
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid
