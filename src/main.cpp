@@ -5,9 +5,12 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <ctime>
 
 int main(int argc, char* argv[]) {
-    ArgParser parser(argc, argv);
+    srand(static_cast<unsigned>(time(nullptr)));  // Seed rand
+
+    ArgParser parser(static_cast<size_t>(argc), argv);
 
     if (!parser.parse())
         return 1;
@@ -16,24 +19,25 @@ int main(int argc, char* argv[]) {
         std::filesystem::create_directories(parser.getVizDir());
 
     Grid grid(parser.getWidth(), parser.getHeight());
+    grid.initializeRandom(parser.getDensity(), parser.getVMax());
 
-    grid.getCell(1, 0).setAlive(true);
-    grid.getCell(2, 1).setAlive(true);
-    grid.getCell(0, 2).setAlive(true);
-    grid.getCell(1, 2).setAlive(true);
-    grid.getCell(2, 2).setAlive(true);
+    NSRules rules;
 
-    GameOfLifeRules rules;
+    // For experiments: Track avg velocity over steps
+    std::cout << "Step, AvgVelocity" << std::endl;
 
-    for (int step = 0; step < parser.getSteps(); ++step) {
-        grid.update(rules);
+    for (int step = 0; step < parser.getSteps(); step++) {
+        grid.update(rules, parser.getVMax(), parser.getProb());
+
+        double avgVel = grid.averageVelocity();
+        std::cout << step << ", " << avgVel << std::endl;
 
         if (parser.isVizEnabled()) {
             std::ostringstream ss;
             ss << parser.getVizDir() << "/frame_" 
-               << std::setw(3) << std::setfill('0') << step << ".ppm";
+               << std::setw(4) << std::setfill('0') << step << ".ppm";
 
-            grid.exportPPM(ss.str(), 50);
+            grid.exportPPM(ss.str(), 10, parser.getVMax());
             std::cout << "Saved frame: " << ss.str() << std::endl;
         }
     }
