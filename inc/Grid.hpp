@@ -52,7 +52,7 @@ public:
      * @param filename Name of the file
      * @param scale Pixel scale factor
      */
-    void exportPPM(const std::string& filename, int scale) const;
+    void exportPPM(const std::string& filename, int scale, int vmax) const;
 
     /**
      * @brief Computes average velocity of all cars

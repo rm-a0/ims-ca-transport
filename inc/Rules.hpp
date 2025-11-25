@@ -21,6 +21,18 @@ public:
 };
 
 /**
+ * @class GameOfLifeRules
+ * @brief Retained for reference, but not used in traffic model
+ */
+// class GameOfLifeRules : public Rules {
+// public:
+//     int nextVelocity(int currentVel, int distToNext, int vmax, double p) const override {
+//         // Not used
+//         return 0;
+//     }
+// };
+
+/**
  * @class NSRules
  * @brief Nagel-Schreckenberg rules for traffic flow
  */
