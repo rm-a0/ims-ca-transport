@@ -1,6 +1,6 @@
 /**
  * @file ArgParser.hpp
- * @author Michal Repcik (xrepcim00)
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
  */
 #ifndef ARG_PARSER_HPP
 #define ARG_PARSER_HPP

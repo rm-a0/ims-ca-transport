@@ -1,12 +1,8 @@
 #include "Cell.hpp"
 #include <iostream>
 
-Cell::Cell(bool state) : alive(state) {}
+Cell::Cell(int vel) : velocity(vel) {}
 
-void Cell::setAlive(bool state) {
-    alive = state;
-}
-
-void Cell::toggle() {
-    alive = !alive;
+void Cell::setVelocity(int vel) {
+    velocity = velocity;
 }

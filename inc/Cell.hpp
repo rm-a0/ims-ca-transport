@@ -1,6 +1,6 @@
 /**
  * @file Cell.hpp
- * @author Michal Repcik (xrepcim00)
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
  */
 #ifndef CELL_HPP
 #define CELL_HPP 

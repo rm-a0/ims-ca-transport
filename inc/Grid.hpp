@@ -1,6 +1,6 @@
 /**
  * @file Grid.hpp
- * @author Michal Repcik (xrepcim00)
+ * @author Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
  */
 #ifndef GRID_HPP
 #define GRID_HPP

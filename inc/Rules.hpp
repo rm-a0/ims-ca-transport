@@ -1,6 +1,6 @@
 /**
  * @file Rules.hpp
- * @author Michal Repcik (xrepcim00)
+ * @author Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
  */
 
 #ifndef RULES_HPP
@@ -15,21 +15,18 @@ public:
     virtual ~Rules() = default;
 
     /**
-     * @brief Determines the next state of a cell based on current state and neighbors
-     * @param currentState The current state of the cell
-     * @param aliveNeighbors Number of alive neighboring cells
-     * @return The next state of the cell
-     */ 
-    virtual bool nextState(bool currentState, int aliveNeighbors) const = 0;
+     * @brief Determines the next velocity of a cell (abstract, but for NS we override in subclass)
+     */
+    virtual int nextVelocity(int currentVel, int distToNext, int vmax, double p) const = 0;
 };
 
 /**
- * @class GameOfLifeRules
- * @brief Example implementation of Conway's Game of Life rules
+ * @class NSRules
+ * @brief Nagel-Schreckenberg rules for traffic flow
  */
-class GameOfLifeRules : public Rules {
+class NSRules : public Rules {
 public:
-    bool nextState(bool currentAlive, int aliveNeighbors) const override;
+    int nextVelocity(int currentVel, int distToNext, int vmax, double p) const override;
 };
 
-#endif // RULES_HPP__
+#endif // RULES_HPP
