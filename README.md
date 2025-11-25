@@ -1,4 +1,6 @@
 # Overview
+Nagel–Schreckenberg model
+https://en.wikipedia.org/wiki/Nagel%E2%80%93Schreckenberg_model
 TODO
 # How to use
 ```bash
