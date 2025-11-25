@@ -39,15 +39,21 @@ public:
     int getSteps() const { return steps; }
     int getWidth() const { return width; }
     int getHeight() const { return height; }
+    int getVMax() const { return vmax; }
+    double getProb() const { return prob; }
+    double getDensity() const { return density; }
 
 private:
     size_t argc;                ///< Argument count
     char** argv;                ///< Arguments
     bool vizFlag = false;       ///< Flag for visualization
     std::string vizDir = "viz"; ///< Directory where PPM output is saved
-    int steps = 10;             ///< Number of steps
-    int width = 10;             ///< Grid width
-    int height = 10;            ///< Grid height
+    int steps = 100;            ///< Number of steps
+    int width = 100;            ///< Grid width (road length)
+    int height = 1;             ///< Grid height (lanes)
+    int vmax = 5;               ///< Max velocity
+    double prob = 0.3;          ///< Braking probability
+    double density = 0.2;       ///< Initial car density (0-1)
 };
 
-#endif // ARG_PARSER_HPP__
+#endif // ARG_PARSER_HPP

@@ -1,7 +1,7 @@
 #include "Grid.hpp"
-#include <cstdlib>  // rand
-#include <algorithm>  // min, max
-#include <numeric>  // accumulate for avg
+#include <cstdlib>
+#include <algorithm>
+#include <numeric>
 
 Grid::Grid(int w, int h) : width(w), height(h) {
     cells.resize(height, std::vector<Cell>(width));
