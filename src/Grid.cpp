@@ -154,7 +154,8 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
             // Check for car
             else if (cells[cellY][cellX].hasCar()) {
                 int id = cells[cellY][cellX].getCarId();
-                auto [rr, gg, bb] = Utils::idColormap(id);  
+                int vel = cells[cellY][cellX].getCarVelocity();
+                auto [rr, gg, bb] = Utils::velocityColormap(vel, vmax, Colormap::Turbo);  
                 r = rr; g = gg; b = bb;
             }
             // Empty cell
