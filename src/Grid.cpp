@@ -73,14 +73,19 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
 
             int cellX = px / scale;
             int cellY = py / scale;
-
+            
             int id  = cells[cellY][cellX].getCarId();
-
+            int vel  = cells[cellY][cellX].getVelocity();
+            
+            bool vizById = true;
+            bool vizByVel = false;
             unsigned char r, g, b;
-            if (id < 0) {
-                r = g = b = 0;
-            } else {
+            if (vizById) {
                 auto [rr, gg, bb] = Utils::idColormap(id);  
+                r = rr; g = gg; b = bb;
+            }
+            else if (vizByVel) {
+                auto [rr, gg, bb] = Utils::velocityColormap(vel ,vmax, Colormap::Turbo);  
                 r = rr; g = gg; b = bb;
             }
 
