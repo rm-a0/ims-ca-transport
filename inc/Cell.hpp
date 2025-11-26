@@ -42,6 +42,8 @@ public:
     void setAlive(bool val) { alive = val; }
     bool isAlive() const { return alive; }
 
+    int getEffectiveVelocity() const;
+
     /** Car setters/getters */
     void setCar(const Car& c) { car = c; }
     void setCarVelocity(int v);
@@ -59,12 +61,13 @@ public:
     /** TrafficLight setters/getters */
     void setTrafficLight(const TrafficLight& t);
     bool hasTrafficLight() const { return tl.has_value(); }
+    TrafficLight::State getTrafficLightState() const { return tl ? tl->state : TrafficLight::GREEN; }
     void updateTrafficLight();
 
+    std::optional<TrafficLight> tl;
 private:
     std::optional<Car> car;
     std::optional<Road> road;
-    std::optional<TrafficLight> tl;
     bool alive;
 };
 

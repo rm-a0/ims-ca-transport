@@ -71,6 +71,14 @@ void TrafficLight::update() {
     }
 }
 
+int Cell::getEffectiveVelocity() const {
+    if (hasCar()) 
+        return getCarVelocity();
+    if (hasTrafficLight()) 
+        return (getTrafficLightState() == TrafficLight::RED) ? 0 : -1;
+    return -1;
+}
+
 void Cell::moveCarTo(Cell& dest) {
     if (!car.has_value()) return;
     dest.setCar(*car);
