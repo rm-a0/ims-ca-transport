@@ -18,23 +18,21 @@ public:
     Cell(int velocity = -1);
 
     /**
-     * @brief Sets cell velocity
-     * @param velocity Value to be set (-1=empty, >=0=car (velocity))
+     * @brief Setters
      */
     void setVelocity(int velocity);
+    void setCarId(int id);
 
     /**
-     * @brief Getter for Cell velocity
+     * @brief Getters
      */
     int getVelocity() const { return velocity; }
-
-    /**
-     * @brief Check if cell has a car
-     */
     bool hasCar() const { return velocity >= 0; }
+    int getCarId() const {return carId; }
 
 private:
-    int velocity;   /// Cell velocity (-1=empty, 0..vmax=car speed)
+    int velocity;       ///< Cell velocity (-1=empty, 0..vmax=car speed)
+    int carId = -1;     ///< ID of a car (for colormapping)
 };
 
 #endif // CELL_HPP

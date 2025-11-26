@@ -72,6 +72,7 @@ private:
     int width;                              ///< Width of the grid (road length)
     int height;                             ///< Height of the grid (lanes)
     std::vector<std::vector<Cell>> cells;   ///< 2D vector containing cells
+    int nextCarId = 0;                      ///< ID of the next car
 };
 
 #endif // GRID_HPP

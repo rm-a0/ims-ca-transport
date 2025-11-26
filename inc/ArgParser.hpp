@@ -50,7 +50,7 @@ private:
     std::string vizDir = "viz"; ///< Directory where PPM output is saved
     int steps = 100;            ///< Number of steps
     int width = 100;            ///< Grid width (road length)
-    int height = 1;           ///< Grid height (lanes)
+    int height = 10;           ///< Grid height (lanes)
     int vmax = 5;               ///< Max velocity
     double prob = 0.3;          ///< Braking probability
     double density = 0.2;       ///< Initial car density (0-1)
