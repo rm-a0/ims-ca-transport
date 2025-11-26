@@ -71,13 +71,16 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
 
             int vel = cells[cellY][cellX].getVelocity();
             unsigned char r, g, b;
-            if (vel < 0) {  // Empty: white
-                r = g = b = 255;
+            if (vel < 0) {  // Empty: black
+                r = g = b = 0;
             } else {  // Car: color by velocity (blue=slow, green=mid, red=fast)
                 int hue = static_cast<int>(255.0 * vel / (vmax == 0 ? 1 : vmax));
-                r = hue >= 128 ? hue : 0;
-                g = hue >= 128 ? (255 - hue) * 2 : hue * 2;
-                b = hue < 128 ? (127 - hue) * 2 : 0;
+                // r = hue >= 128 ? hue : 0;
+                // g = hue >= 128 ? (255 - hue) * 2 : hue * 2;
+                // b = hue < 128 ? (127 - hue) * 2 : 0;
+                r = hue > 170 ? 255 : 0;
+                g = hue > 85 && hue <= 170 ? 255 : 0;
+                b = hue <= 85 ? 255 : 0;
             }
 
             file.put(r);

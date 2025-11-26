@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
         if (parser.isVizEnabled()) {
             std::ostringstream ss;
             ss << parser.getVizDir() << "/frame_" 
-               << std::setw(4) << std::setfill('0') << step << ".ppm";
+               << std::setw(5) << std::setfill('0') << step << ".ppm";
 
             grid.exportPPM(ss.str(), 10, parser.getVMax());
             std::cout << "Saved frame: " << ss.str() << std::endl;

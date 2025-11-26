@@ -4,5 +4,5 @@
 Cell::Cell(int vel) : velocity(vel) {}
 
 void Cell::setVelocity(int vel) {
-    velocity = velocity;
+    velocity = vel;
 }

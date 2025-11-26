@@ -6,5 +6,5 @@ TODO
 ```bash
 make
 make run
-ffmpeg -i viz/frame_%03d.ppm -r 60 output.mp4
+ffmpeg -i viz/frame_%05d.ppm -r 60 output.mp4
 ```

@@ -3,3 +3,4 @@ build/
 main
 viz/
 *.mp4
+*.gif
