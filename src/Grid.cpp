@@ -5,36 +5,7 @@
 #include <array>
 #include <cmath>
 #include <fstream>
-
-inline std::array<unsigned char, 3> idColormap(int id) {
-    if (id < 0) return {0, 0, 0};
-
-    // Knuth multiplicative hash
-    unsigned int h = (id * 2654435761u) % 360;
-
-    double s = 0.85;
-    double v = 0.90;
-
-    double C = v * s;
-    double hh = h / 60.0;   // sector index
-    double X = C * (1 - std::fabs(std::fmod(hh, 2.0) - 1.0));
-    double m = v - C;
-
-    double r, g, b;
-
-    if      (hh < 1) { r = C; g = X; b = 0; }
-    else if (hh < 2) { r = X; g = C; b = 0; }
-    else if (hh < 3) { r = 0; g = C; b = X; }
-    else if (hh < 4) { r = 0; g = X; b = C; }
-    else if (hh < 5) { r = X; g = 0; b = C; }
-    else             { r = C; g = 0; b = X; }
-
-    return {
-        (unsigned char)((r + m) * 255),
-        (unsigned char)((g + m) * 255),
-        (unsigned char)((b + m) * 255)
-    };
-}
+#include "Utils.hpp"
 
 Grid::Grid(int w, int h) : width(w), height(h) {
     cells.resize(height, std::vector<Cell>(width));
@@ -109,7 +80,7 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
             if (id < 0) {
                 r = g = b = 0;
             } else {
-                auto [rr, gg, bb] = idColormap(id);  
+                auto [rr, gg, bb] = Utils::idColormap(id);  
                 r = rr; g = gg; b = bb;
             }
 
