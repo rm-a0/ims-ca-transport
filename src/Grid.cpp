@@ -1,9 +1,5 @@
 #include "Grid.hpp"
 #include <cstdlib>
-#include <algorithm>
-#include <numeric>
-#include <array>
-#include <cmath>
 #include <fstream>
 #include "Utils.hpp"
 
@@ -18,12 +14,11 @@ Grid::Grid(int w, int h) : width(w), height(h) {
 void Grid::initializeRandom(double density, int vmax) {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-
             if ((double)rand() / RAND_MAX < density) {
-                cells[y][x].setVelocity(rand() % (vmax + 1));
-                cells[y][x].setCarId(nextCarId++);  // ID assigned ONCE
+                cells[y][x].setCarVelocity(rand() % (vmax + 1));
+                cells[y][x].setCarId(nextCarId++);
             } else {
-                cells[y][x].setVelocity(-1); // empty
+                cells[y][x].removeCar();
             }
         }
     }
@@ -34,17 +29,16 @@ void Grid::update(const Rules& rules, int vmax, double p) {
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
+            if (!cells[y][x].hasCar()) continue;
 
-            int currentVel = cells[y][x].getVelocity();
-            if (currentVel < 0) continue; // empty
-
+            int currentVel = cells[y][x].getCarVelocity();
             int dist = distanceToNextCar(x, y);
             int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
 
             int newX = (x + newVel) % width;
 
-            next[y][newX].setVelocity(newVel);
-            next[y][newX].setCarId(cells[y][x].getCarId());
+            cells[y][x].moveCarTo(next[y][newX]);
+            next[y][newX].setCarVelocity(newVel);
         }
     }
 
@@ -70,24 +64,13 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
 
     for (int py = 0; py < height * scale; py++) {
         for (int px = 0; px < width * scale; px++) {
-
             int cellX = px / scale;
             int cellY = py / scale;
             
             int id  = cells[cellY][cellX].getCarId();
-            int vel  = cells[cellY][cellX].getVelocity();
-            
-            bool vizById = true;
-            bool vizByVel = false;
             unsigned char r, g, b;
-            if (vizById) {
-                auto [rr, gg, bb] = Utils::idColormap(id);  
-                r = rr; g = gg; b = bb;
-            }
-            else if (vizByVel) {
-                auto [rr, gg, bb] = Utils::velocityColormap(vel ,vmax, Colormap::Turbo);  
-                r = rr; g = gg; b = bb;
-            }
+            auto [rr, gg, bb] = Utils::idColormap(id);  
+            r = rr; g = gg; b = bb;
 
             file.put(r);
             file.put(g);
@@ -102,9 +85,8 @@ double Grid::averageVelocity() const {
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            int v = cells[y][x].getVelocity();
-            if (v >= 0) {
-                totalVel += v;
+            if (cells[y][x].hasCar()) {
+                totalVel += cells[y][x].getCarVelocity();
                 carCount++;
             }
         }
