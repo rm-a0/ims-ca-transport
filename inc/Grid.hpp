@@ -22,18 +22,6 @@ public:
      */
     Grid(int w, int h);
     /**
-     * @brief Initializes grid with random cars at given density
-     * @param density Fraction of cells with cars (0-1)
-     * @param vmax Max velocity for initial cars
-     */
-    void initializeRandom(double density, int vmax);
-    /**
-     * @brief Initializes grid for left-to-right spawning
-     * @param vmax Max velocity
-     * @param spawnProbability Probability of spawning at leftmost column
-     */
-    void initializeLeftToRight(int vmax, double spawnProbability);
-    /**
      * @brief Adds a traffic light at specified position
      * @param x X coordinate
      * @param y Y coordinate
@@ -47,12 +35,10 @@ public:
      */
     void updateTrafficLights();
     /**
-     * @brief Spawns a car at the leftmost column if cell is empty
-     * @param y Lane (row) to spawn car in
+     * @brief Spawns cars at the corners of grid
      * @param velocity Initial velocity of the car
-     * @return true if car was spawned, false if cell was occupied
      */
-    bool spawnCarAtLeft(int y, int velocity);
+    void spawnCars(int velocity);
     /**
      * @brief Updates the grid using specified rules (NS for traffic)
      * @param rules Rules to be applied

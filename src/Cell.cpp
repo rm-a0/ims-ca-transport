@@ -5,17 +5,14 @@
 
 #include "Cell.hpp"
 
-Cell::Cell(int velocity)
-    : alive(true)
-{
-    if (velocity >= 0) {
-        car = Car{-1, velocity};
-    }
+void Cell::setCarDirection(Direction dir) {
+    if (car.has_value())
+        car->direction = dir;
 }
 
-void Cell::setRoadDirection(Road::Direction dir) {
-    if (road.has_value())
-        road->direction = dir;
+void Cell::setTurnDirection(Direction dir) {
+    if (turn.has_value())
+        turn->direction = dir;
 }
 
 void Cell::setCarVelocity(int v) {
@@ -34,8 +31,8 @@ void Cell::removeCar() {
     car.reset();
 }
 
-void Cell::setRoad(const Road& r) {
-    road = r;
+void Cell::setTurn(const Turn& t) {
+    turn = t;
 }
 
 void Cell::setTrafficLight(const TrafficLight& t) {

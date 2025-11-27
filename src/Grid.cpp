@@ -1,49 +1,44 @@
 #include "Grid.hpp"
 #include <cstdlib>
 #include <fstream>
+#include <algorithm>
 #include "Utils.hpp"
 
 Grid::Grid(int w, int h) : width(w), height(h) {
     cells.resize(height, std::vector<Cell>(width));
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
-            cells[y][x] = Cell(-1); // empty
+            cells[y][x] = Cell(); // empty
 }
 
-void Grid::initializeRandom(double density, int vmax) {
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            if ((double)rand() / RAND_MAX < density) {
-                cells[y][x].setCarVelocity(rand() % (vmax + 1));
-                cells[y][x].setCarId(nextCarId++);
-            } else {
-                cells[y][x].removeCar();
-            }
-        }
+void Grid::spawnCars(int velocity) {
+    // Upper half: leftmost side, direction right
+    for (int y = 0; y < height / 2; y++) {
+        int spawnX = 0;
+        if (cells[y][spawnX].hasCar())
+            continue;
+       
+        cells[y][spawnX].setCarVelocity(velocity);
+        cells[y][spawnX].setCarDirection(Direction::RIGHT);
+        cells[y][spawnX].setCarId(nextCarId++);
     }
-}
-
-void Grid::initializeLeftToRight(int vmax, double spawnProbability) {
-    // Clear the grid first
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            cells[y][x].removeCar();
-        }
-    }
-    
-    // Spawn cars from the leftmost column with some probability
-    for (int y = 0; y < height; y++) {
-        if ((double)rand() / RAND_MAX < spawnProbability) {
-            cells[y][0].setCarVelocity(rand() % (vmax + 1));
-            cells[y][0].setCarId(nextCarId++);
-        }
+   
+    // Lower half: rightmost side, direction left
+    for (int y = height / 2; y < height; y++) {
+        int spawnX = width - 1;
+        if (cells[y][spawnX].hasCar())
+            continue;
+       
+        cells[y][spawnX].setCarVelocity(velocity);
+        cells[y][spawnX].setCarDirection(Direction::LEFT);
+        cells[y][spawnX].setCarId(nextCarId++);
     }
 }
 
 void Grid::addTrafficLight(int x, int y, int redDur, int yellowDur, int greenDur) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
         TrafficLight tl;
-        tl.state = TrafficLight::GREEN; // Start with green
+        tl.state = TrafficLight::GREEN;
         tl.redDuration = redDur;
         tl.yellowDuration = yellowDur;
         tl.greenDuration = greenDur;
@@ -60,42 +55,77 @@ void Grid::updateTrafficLights() {
     }
 }
 
-bool Grid::spawnCarAtLeft(int y, int velocity) {
-    if (y < 0 || y >= height)
-        return false;
-    
-    if (cells[y][0].hasCar())
-        return false; // Cell already occupied
-    
-    cells[y][0].setCarVelocity(velocity);
-    cells[y][0].setCarId(nextCarId++);
-    return true;
-}
-
 void Grid::update(const Rules& rules, int vmax, double p) {
-    std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell(-1)));
+    std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell()));
     
     // Copy traffic lights to next state
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             if (cells[y][x].hasTrafficLight()) {
-                next[y][x].setTrafficLight(*cells[y][x].tl);
+                next[y][x].setTrafficLight(*cells[y][x].getTrafficLight());
             }
         }
     }
     
-    // Update cars
+    // First pass: Calculate desired positions and velocities for all cars
+    struct CarMove {
+        int oldX, oldY;
+        int newX, newY;
+        int newVel;
+        int carId;
+        Direction dir;
+    };
+    std::vector<CarMove> moves;
+    
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             if (!cells[y][x].hasCar()) continue;
-            
+
+            Direction dir = cells[y][x].getCarDirection();
+            int dx = 0, dy = 0;
+            if (dir == Direction::RIGHT) { dx = 1; dy = 0; }
+            else if (dir == Direction::LEFT) { dx = -1; dy = 0; }
+            else if (dir == Direction::UP) { dx = 0; dy = -1; }
+            else if (dir == Direction::DOWN) { dx = 0; dy = 1; }
+        
             int currentVel = cells[y][x].getCarVelocity();
             int dist = distanceToNextCar(x, y);
-            int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
-            int newX = (x + newVel) % width;
             
-            cells[y][x].moveCarTo(next[y][newX]);
-            next[y][newX].setCarVelocity(newVel);
+            // Apply Nagel-Schreidemacher rules
+            int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
+            
+            // Clamp velocity to available space
+            if (dist > 0) {
+                newVel = std::min(newVel, dist - 1);
+            }
+            newVel = std::max(0, newVel);
+        
+            // Calculate new position
+            int newX = x;
+            int newY = y;
+            
+            if (dx != 0) {
+                newX = (x + newVel * dx % width + width) % width;
+            }
+            if (dy != 0) {
+                newY = (y + newVel * dy % height + height) % height;
+            }
+            
+            moves.push_back({x, y, newX, newY, newVel, cells[y][x].getCarId(), dir});
+        }
+    }
+    
+    // Second pass: Apply moves, checking for conflicts
+    for (const auto& move : moves) {
+        // Check if destination is already occupied in next grid
+        if (next[move.newY][move.newX].hasCar()) {
+            // Collision detected! Keep car at current position with velocity 0
+            cells[move.oldY][move.oldX].moveCarTo(next[move.oldY][move.oldX]);
+            next[move.oldY][move.oldX].setCarVelocity(0);
+        } else {
+            // Safe to move
+            cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
+            next[move.newY][move.newX].setCarVelocity(move.newVel);
         }
     }
     
@@ -103,25 +133,42 @@ void Grid::update(const Rules& rules, int vmax, double p) {
 }
 
 int Grid::distanceToNextCar(int x, int y) const {
+    if (!cells[y][x].hasCar()) return 0; // Should not happen
+   
+    Direction dir = cells[y][x].getCarDirection();
+    int dx = 0, dy = 0;
+    int loop_size = 0;
+    if (dir == Direction::RIGHT || dir == Direction::LEFT) {
+        loop_size = width;
+        dx = (dir == Direction::RIGHT) ? 1 : -1;
+    } else if (dir == Direction::UP || dir == Direction::DOWN) {
+        loop_size = height;
+        dy = (dir == Direction::DOWN) ? 1 : -1;
+    }
+   
     int dist = 1;
-    while (dist <= width) {
-        int nx = (x + dist) % width;
-        
-        // Check for traffic light
-        if (cells[y][nx].hasTrafficLight()) {
-            if (cells[y][nx].getTrafficLightState() == TrafficLight::RED) {
-                return dist; // Treat red light as obstacle
+    int cx = x;
+    int cy = y;
+   
+    while (dist < loop_size) {
+        cx = (cx + dx + width) % width;
+        cy = (cy + dy + height) % height;
+       
+        // Check for red traffic light
+        if (cells[cy][cx].hasTrafficLight()) {
+            if (cells[cy][cx].getTrafficLightState() == TrafficLight::RED) {
+                return dist;
             }
         }
-        
-        // Check for car
-        if (cells[y][nx].hasCar()) {
+       
+        // Check for another car
+        if (cells[cy][cx].hasCar()) {
             return dist;
         }
-        
+       
         dist++;
     }
-    return width;
+    return loop_size;
 }
 
 void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {

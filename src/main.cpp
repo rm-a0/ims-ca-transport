@@ -29,11 +29,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Step, AvgVelocity" << std::endl;
     
     for (int step = 0; step < parser.getSteps(); step++) {
-        for (int y = 0; y < parser.getHeight(); y++) {
-            if ((double)rand() / RAND_MAX < spawnProbability) {
-                int initialVel = rand() % (parser.getVMax() + 1);
-                grid.spawnCarAtLeft(y, initialVel);
-            }
+        if ((double)rand() / RAND_MAX < spawnProbability) {
+            int initialVel = rand() % (parser.getVMax() + 1);
+            grid.spawnCars(initialVel);
         }
         
         grid.updateTrafficLights();

@@ -7,13 +7,21 @@
 
 #include <optional>
 
+enum Direction { 
+    LEFT, 
+    RIGHT, 
+    UP, 
+    DOWN
+};
+
 struct Car {
     int id;
     int velocity;
+    Direction direction;
 };
 
-struct Road {
-    enum Direction { LEFT, RIGHT, UP, DOWN } direction;
+struct Turn {
+    Direction direction;
 };
 
 struct TrafficLight {
@@ -34,7 +42,7 @@ struct TrafficLight {
 class Cell {
 public:
     /** Constructor */
-    Cell(int velocity = -1);
+    Cell() : car(std::nullopt), turn(std::nullopt), tl(std::nullopt), alive(false) {}
 
     void moveCarTo(Cell& dest);
 
@@ -48,26 +56,29 @@ public:
     void setCar(const Car& c) { car = c; }
     void setCarVelocity(int v);
     void setCarId(int id);
+    void setCarDirection(Direction dir);
+    Direction getCarDirection() const { return car? car-> direction : Direction::RIGHT; }
     int getCarVelocity() const { return car ? car->velocity : -1; }
     int getCarId() const { return car ? car->id : -1; }
     bool hasCar() const { return car.has_value(); }
     void removeCar();
 
     /** Road setters/getters */
-    void setRoad(const Road& r);
-    void setRoadDirection(Road::Direction dir);
-    bool hasRoad() const { return road.has_value(); }
+    void setTurn(const Turn& t);
+    void setTurnDirection(Direction dir);
+    bool hasTurn() const { return turn.has_value(); }
 
     /** TrafficLight setters/getters */
     void setTrafficLight(const TrafficLight& t);
     bool hasTrafficLight() const { return tl.has_value(); }
+    const std::optional<TrafficLight>& getTrafficLight() const { return tl; }
     TrafficLight::State getTrafficLightState() const { return tl ? tl->state : TrafficLight::GREEN; }
     void updateTrafficLight();
 
-    std::optional<TrafficLight> tl;
 private:
     std::optional<Car> car;
-    std::optional<Road> road;
+    std::optional<Turn> turn;
+    std::optional<TrafficLight> tl;
     bool alive;
 };
 
