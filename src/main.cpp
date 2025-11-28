@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <iostream>
 #include <ctime>
+#include <cmath>
+#include <map>
 
 int main(int argc, char* argv[]) {
     srand(static_cast<unsigned>(time(nullptr)));
@@ -16,34 +18,22 @@ int main(int argc, char* argv[]) {
         std::filesystem::create_directories(parser.getVizDir());
     
     Grid grid(parser.getWidth(), parser.getHeight());
-    
-    int middleX = parser.getWidth() / 2;
-    std::cout << "Adding traffic lights at x=" << middleX << std::endl;
-    for (int y = 0; y < parser.getHeight(); y++)
-        grid.addTrafficLight(middleX, y, 30, 5, 30);
+    grid.setupCrossroadLights(25, 0, 20);
+    grid.initializeCarsWithDensity(parser.getDensity(), parser.getVMax());
     
     NSRules rules;
-    
-    double spawnProbability = parser.getDensity();
     
     std::cout << "Step, AvgVelocity" << std::endl;
     
     for (int step = 0; step < parser.getSteps(); step++) {
-        if ((double)rand() / RAND_MAX < spawnProbability) {
-            int initialVel = rand() % (parser.getVMax() + 1);
-            grid.spawnCars(initialVel);
-        }
-        
-        grid.updateTrafficLights();
         grid.update(rules, parser.getVMax(), parser.getProb());
         
         double avgVel = grid.averageVelocity();
         std::cout << step << ", " << avgVel << std::endl;
-        
+
         if (parser.isVizEnabled()) {
             std::ostringstream ss;
-            ss << parser.getVizDir() << "/frame_" 
-               << std::setw(5) << std::setfill('0') << step << ".ppm";
+            ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
             grid.exportPPM(ss.str(), 10, parser.getVMax());
         }
     }

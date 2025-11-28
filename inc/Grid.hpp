@@ -21,19 +21,9 @@ public:
      * @param h Grid height (lanes, use 1 for single-lane)
      */
     Grid(int w, int h);
-    /**
-     * @brief Adds a traffic light at specified position
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param redDur Red light duration in steps
-     * @param yellowDur Yellow light duration in steps
-     * @param greenDur Green light duration in steps
-     */
-    void addTrafficLight(int x, int y, int redDur, int yellowDur, int greenDur);
-    /**
-     * @brief Updates all traffic lights in the grid
-     */
-    void updateTrafficLights();
+
+    void setupCrossroadLights(int redDur, int yellowDur, int greenDur);
+    void initializeCarsWithDensity(double density, int maxVelocity);
     /**
      * @brief Spawns cars at the corners of grid
      * @param velocity Initial velocity of the car
@@ -59,6 +49,7 @@ public:
      * @param scale Pixel scale factor
      */
     void exportPPM(const std::string& filename, int scale, int vmax) const;
+    void exportSmoothPPM(const std::string& filename, int scale, int vmax, const Grid& nextGrid, float t) const;
     /**
      * @brief Computes average velocity of all cars
      * @return Avg velocity (or 0 if no cars)
