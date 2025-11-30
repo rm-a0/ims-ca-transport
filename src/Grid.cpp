@@ -63,6 +63,10 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
             cells[y][x].setCarId(nextCarId++);
             carsSpawned++;
         }
+        
+        Turn t;
+        t.direction = Direction::UP;
+        cells[50][50].setTurn(t);
     }
 }
 
@@ -140,12 +144,15 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
 void Grid::update(const Rules& rules, int vmax, double p) {
     std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell()));
    
-    // Copy traffic lights to next state
+    // Copy traffic lights and turns to next state
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             if (cells[y][x].hasTrafficLight()) {
                 cells[y][x].updateTrafficLight();
                 next[y][x].setTrafficLight(*cells[y][x].getTrafficLight());
+            }
+            if (cells[y][x].hasTurn()) {
+                next[y][x].setTurn(*cells[y][x].getTurn());
             }
         }
     }
@@ -199,16 +206,10 @@ void Grid::update(const Rules& rules, int vmax, double p) {
    
     // Second pass: Apply moves, checking for conflicts
     for (const auto& move : moves) {
-        // Check if destination is already occupied in next grid
-        if (next[move.newY][move.newX].hasCar()) {
-            // Collision detected, keep car at current position with velocity 0
-            cells[move.oldY][move.oldX].moveCarTo(next[move.oldY][move.oldX]);
-            next[move.oldY][move.oldX].setCarVelocity(0);
-        } else {
-            // Safe to move
-            cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
-            next[move.newY][move.newX].setCarVelocity(move.newVel);
-        }
+        cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
+        if (next[move.newY][move.newX].hasTurn())
+            next[move.newY][move.newX].setCarDirection(next[move.newY][move.newX].getTurnDirection());
+        next[move.newY][move.newX].setCarVelocity(move.newVel);
     }
    
     cells = std::move(next);
@@ -246,6 +247,10 @@ int Grid::distanceToNextCar(int x, int y) const {
         // Check for another car
         if (cells[cy][cx].hasCar()) {
             return dist;
+        }
+
+        if (cells[cy][cx].hasTurn()) {
+            return dist + 1;
         }
       
         dist++;
@@ -286,6 +291,10 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
                 int vel = cells[cellY][cellX].getCarVelocity();
                 auto [rr, gg, bb] = Utils::velocityColormap(vel, vmax, Colormap::Turbo);
                 r = rr; g = gg; b = bb;
+            }
+            // Check for turn
+            else if (cells[cellY][cellX].hasTurn()) {
+                r = 255; g = 255; b = 255;
             }
             // Empty cell
             else {

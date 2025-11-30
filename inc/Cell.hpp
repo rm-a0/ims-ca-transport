@@ -66,6 +66,8 @@ public:
     /** Road setters/getters */
     void setTurn(const Turn& t);
     void setTurnDirection(Direction dir);
+    const std::optional<Turn>& getTurn() const { return turn; }
+    Direction getTurnDirection() const { return turn ? turn->direction : Direction::RIGHT; }
     bool hasTurn() const { return turn.has_value(); }
 
     /** TrafficLight setters/getters */

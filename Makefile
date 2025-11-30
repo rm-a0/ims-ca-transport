@@ -30,7 +30,7 @@ clean:
 runviz: $(TARGET)
 	rm -rf viz/ output.gif
 	./$(TARGET) -v
-	ffmpeg -i viz/frame_%05d.ppm -r 10 output.mp4 -y
+	ffmpeg -i viz/frame_%05d.ppm -r 5 output.mp4 -y
 
 cleanviz:
 	rm -rf viz/ output.gif
