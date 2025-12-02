@@ -1,3 +1,7 @@
+/**
+ * @file Utils.cpp
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
+ */
 #include "Utils.hpp"
 #include <cmath>
 #include <algorithm>

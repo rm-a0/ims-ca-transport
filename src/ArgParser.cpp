@@ -1,3 +1,7 @@
+/**
+ * @file ArgParser.cpp
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
+ */
 #include "ArgParser.hpp"
 #include <iostream>
 #include <string>

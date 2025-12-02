@@ -1,3 +1,7 @@
+/**
+ * @file Grid.cpp
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
+ */
 #include "Grid.hpp"
 #include <cstdlib>
 #include <fstream>

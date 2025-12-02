@@ -1,3 +1,7 @@
+/**
+ * @file Rules.cpp
+ * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
+ */
 #include "Rules.hpp"
 #include <cstdlib>
 #include <algorithm>
