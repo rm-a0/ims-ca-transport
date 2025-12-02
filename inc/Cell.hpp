@@ -18,6 +18,7 @@ struct Car {
     int id;
     int velocity;
     Direction direction;
+    bool willTurn = false; ///< Indicates if the car will turn at the next turn block
 };
 
 struct Turn {

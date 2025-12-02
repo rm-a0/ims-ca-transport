@@ -24,6 +24,28 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
     int targetCars = static_cast<int>(totalLaneCells * density);
    
     int carsSpawned = 0;
+
+    // set all lane cells as alive (road)
+    for (int lane = 0; lane < numLanes; lane++) {
+        // Vertical lanes
+        for (int y = 0; y < height; y++) {
+            int x1 = centerX - numLanes - laneSpace + lane;
+            int x2 = centerX + lane;
+            if (x1 >= 0 && x1 < width)
+                cells[y][x1].setAlive(true);
+            if (x2 >= 0 && x2 < width)
+                cells[y][x2].setAlive(true);
+        }
+        // Horizontal lanes
+        for (int x = 0; x < width; x++) {
+            int y1 = centerY - numLanes - laneSpace + lane;
+            int y2 = centerY + lane;
+            if (y1 >= 0 && y1 < height)
+                cells[y1][x].setAlive(true);
+            if (y2 >= 0 && y2 < height)
+                cells[y2][x].setAlive(true);
+        }
+    }
    
     // Try to spawn cars randomly in the lanes until we reach target density
     while (carsSpawned < targetCars) {
@@ -154,6 +176,9 @@ void Grid::update(const Rules& rules, int vmax, double p) {
             if (cells[y][x].hasTurn()) {
                 next[y][x].setTurn(*cells[y][x].getTurn());
             }
+            if (cells[y][x].isAlive()) {
+            next[y][x].setAlive(true);
+        }
         }
     }
    
@@ -182,12 +207,6 @@ void Grid::update(const Rules& rules, int vmax, double p) {
            
             // Apply Nagel-Schreckenberg rules
             int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
-           
-            // Clamp velocity to available space
-            if (dist > 0) {
-                newVel = std::min(newVel, dist - 1);
-            }
-            newVel = std::max(0, newVel);
        
             // Calculate new position with wrapping
             int newX = x;
@@ -295,6 +314,10 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
             // Check for turn
             else if (cells[cellY][cellX].hasTurn()) {
                 r = 255; g = 255; b = 255;
+            }
+            // Check for alive cell (road)
+            else if (cells[cellY][cellX].isAlive()) {
+                r = 0; g = 0; b = 0;
             }
             // Empty cell
             else {

@@ -22,3 +22,15 @@ output.gif -y
 - Author: Anton Mikhailov / Google LLC
 - Source: https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap.html
 - License: Apache 2.0
+
+
+**Notes**
+Cell length = 5m (car length ~ 4.5m) -> 4.5 + 0.5 = 5m
+delta(t) = 1s   -> 1 step == 1s
+vMax = 3
+Colors: (from google maps mapped to cell speed) [avergae speeds per lane]
+    - red = 0-1
+    - yellow = 1-2
+    - green = 2-3
+1 cell/update = 18km/h
+Junction: https://www.google.com/maps/@49.1871103,16.6193066,51m/data=!3m1!1e3!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D
