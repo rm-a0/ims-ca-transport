@@ -27,6 +27,7 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
     int numLanesEastIn = 3;   // From EAST to WEST (towards junction)
     int numLanesEastOut = 2;  // From WEST to EAST (away from junction)
 
+    // Lane spacing from center (between inbound and outbound)
     int northLaneSpace = 1;
     int westLaneSpace = 2;
     int southLaneSpace = 1;
@@ -198,10 +199,33 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
         laneIndex++;
     }
 
-    // Example turn (unchanged)
-    Turn t;
-    t.direction = Direction::UP;
-    cells[50][50].setTurn(t);
+    // Turn blocks at the junction
+    Turn t0;
+    Turn t1;
+    Turn t2;
+    Turn t3;
+    t0.direction = Direction::UP;
+    t1.direction = Direction::LEFT;
+    t2.direction = Direction::DOWN;
+    t3.direction = Direction::RIGHT;
+
+    // Turns for cars coming from NORTH
+    int y_northRight0 = northHeight - westLaneSpace;
+    int x_northRight0 = centerX - northLaneSpace;
+    cells[y_northRight0][x_northRight0].setTurn(t3);
+
+    // Turns for cars coming from SOUTH
+    int y_southLeft0 = southHeight;
+    int x_southLeft0 = centerX;
+    int y_southLeft1 = southHeight - eastLaneSpace;
+    int x_southLeft1 = centerX + southLaneSpace;
+    cells[y_southLeft0][x_southLeft0].setTurn(t1);
+    cells[y_southLeft1][x_southLeft1].setTurn(t1);
+
+    // Turns for cars coming from EAST
+    int y_eastDown0 = centerY - westLaneSpace;
+    int x_eastDown0 = eastWidth + northLaneSpace;
+    cells[y_eastDown0][x_eastDown0].setTurn(t2);
 }
 
 void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
