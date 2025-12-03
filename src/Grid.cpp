@@ -18,114 +18,208 @@ Grid::Grid(int w, int h) : width(w), height(h) {
 }
 
 void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
-    int numLanes = 3;
-    int laneSpace = 1;
+    int numLanesNorthIn = 3;  // From NORTH to SOUTH (towards junction)
+    int numLanesNorthOut = 2; // From SOUTH to NORTH (away from junction)
+    int numLanesWestIn = 2;   // From WEST to EAST (towards junction)
+    int numLanesWestOut = 2;  // From EAST to WEST (away from junction)
+    int numLanesSouthIn = 3;  // From SOUTH to NORTH (towards junction)
+    int numLanesSouthOut = 2; // From NORTH to SOUTH (away from junction)
+    int numLanesEastIn = 3;   // From EAST to WEST (towards junction)
+    int numLanesEastOut = 2;  // From WEST to EAST (away from junction)
+
+    int northLaneSpace = 1;
+    int westLaneSpace = 2;
+    int southLaneSpace = 1;
+    int eastLaneSpace = 1;
+
     int centerX = width / 2;
     int centerY = height / 2;
-   
-    // Calculate total lane cells (12 lanes: 6 vertical + 6 horizontal)
-    int totalLaneCells = 6 * height + 6 * width;
-    int targetCars = static_cast<int>(totalLaneCells * density);
-   
-    int carsSpawned = 0;
 
-    // set all lane cells as alive (road)
-    for (int lane = 0; lane < numLanes; lane++) {
-        // Vertical lanes
-        for (int y = 0; y < height; y++) {
-            int x1 = centerX - numLanes - laneSpace + lane;
-            int x2 = centerX + lane;
-            if (x1 >= 0 && x1 < width)
-                cells[y][x1].setAlive(true);
-            if (x2 >= 0 && x2 < width)
-                cells[y][x2].setAlive(true);
-        }
-        // Horizontal lanes
-        for (int x = 0; x < width; x++) {
-            int y1 = centerY - numLanes - laneSpace + lane;
-            int y2 = centerY + lane;
-            if (y1 >= 0 && y1 < height)
-                cells[y1][x].setAlive(true);
-            if (y2 >= 0 && y2 < height)
-                cells[y2][x].setAlive(true);
-        }
+    // Total number of lanes for each direction
+    int numLanesNorth = numLanesNorthIn + numLanesNorthOut;
+    int numLanesWest = numLanesWestIn + numLanesWestOut;
+    int numLanesSouth = numLanesSouthIn + numLanesSouthOut;
+    int numLanesEast = numLanesEastIn + numLanesEastOut;
+
+    int totalLanes = numLanesNorth + numLanesWest + numLanesSouth + numLanesEast;
+
+    int totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
+    int targetCars = static_cast<int>(totalLaneCells * density);
+
+    // Number of cells per direction (northInHeight will go to the southOut end of the junction)
+    int northHeight = centerY + numLanesWestIn;
+    int westWidth = centerX + numLanesSouthIn;
+    int southHeight = centerY - numLanesEastIn;
+    int eastWidth = centerX - numLanesNorthIn;
+
+
+    // === MARK ROAD CELLS AS ALIVE ===
+
+    // VERTICAL ROADS (North-South)
+    // North inbound: top side, cars going DOWN → left of center (x < centerX)
+    for (int lane = 0; lane < numLanesNorthIn; lane++) {
+        int x = centerX - numLanesNorthIn + lane;
+        if (x < 0 || x >= width) continue;
+        for (int y = 0; y < northHeight; y++)
+            cells[y][x].setAlive(true);
     }
-   
-    // Try to spawn cars randomly in the lanes until we reach target density
-    while (carsSpawned < targetCars) {
-        // Randomly choose a lane (0-11: 0-5 vertical, 6-11 horizontal)
-        int lane = rand() % 12;
-        int x, y;
+
+    // North outbound: top side, cars going UP → right of center
+    for (int lane = 0; lane < numLanesNorthOut; lane++) {
+        int x = centerX + northLaneSpace + lane;
+        if (x < 0 || x >= width) continue;
+        for (int y = 0; y < northHeight; y++)
+            cells[y][x].setAlive(true);
+    }
+
+    // South inbound: bottom side, cars going UP → right of center
+    for (int lane = 0; lane < numLanesSouthIn; ++lane) {
+        int x = centerX + lane;
+        if (x < 0 || x >= width) continue;
+        for (int y = height - 1; y > southHeight; y--)
+            cells[y][x].setAlive(true);
+    }
+
+    // South outbound: bottom side, cars going DOWN → left of center
+    for (int lane = 0; lane < numLanesSouthOut; ++lane) {
+        int x = centerX - numLanesSouthOut - southLaneSpace + lane;
+        if (x < 0 || x >= width) continue;
+        for (int y = height - 1; y > southHeight; y--)
+            cells[y][x].setAlive(true);
+    }
+
+    // HORIZONTAL ROADS (West-East)
+    // West inbound: left side, cars going RIGHT → above center (y < centerY)
+    for (int lane = 0; lane < numLanesWestIn; ++lane) {
+        int y = centerY - numLanesWestIn - westLaneSpace + lane;
+        if (y < 0 || y >= height) continue;
+        for (int x = 0; x < westWidth; x++)
+            cells[y][x].setAlive(true);
+    }
+
+    // West outbound: left side, cars going LEFT → below center
+    for (int lane = 0; lane < numLanesWestOut; ++lane) {
+        int y = centerY + lane;
+        if (y < 0 || y >= height) continue;
+        for (int x = 0; x < westWidth; x++)
+            cells[y][x].setAlive(true);
+    }
+
+    // East inbound: right side, cars going LEFT → below center
+    for (int lane = 0; lane < numLanesEastIn; ++lane) {
+        int y = centerY - numLanesEastIn - eastLaneSpace + lane;
+        if (y < 0 || y >= width) continue;
+        for (int x = width - 1; x > eastWidth; x--)
+            cells[y][x].setAlive(true);
+    }
+
+    // East outbound: right side, cars going RIGHT → above center
+    for (int lane = 0; lane < numLanesEastOut; ++lane) {
+        int y = centerY + lane;
+        if (y < 0 || y >= height) continue;
+        for (int x = width - 1; x > eastWidth; x--)
+            cells[y][x].setAlive(true);
+    }
+
+    // Calculate cars per lane
+    int carsPerLane = targetCars / totalLanes;
+    int extras = targetCars % totalLanes;
+    int laneIndex = 0;
+
+    // Lambda to place cars packed at the edge
+    auto placeInLane = [&](int numCars, int laneNum, std::string dirStr) {
         Direction dir;
-       
-        if (lane < 3) {
-            // Vertical lanes going DOWN (left side of center)
-            x = centerX - numLanes - laneSpace + lane;
-            y = rand() % height;
+        int fixedCoord, startPos, step, length;
+        bool isVertical = (dirStr == "DOWN" || dirStr == "UP");
+        if (dirStr == "DOWN") {
             dir = Direction::DOWN;
-        } else if (lane < 6) {
-            // Vertical lanes going UP (right side of center)
-            x = centerX + (lane - 3);
-            y = rand() % height;
+            fixedCoord = centerX - numLanesWest - eastLaneSpace + laneNum; // x
+            startPos = 0; // y=0 (top)
+            step = 1;
+            length = height;
+        } else if (dirStr == "UP") {
             dir = Direction::UP;
-        } else if (lane < 9) {
-            // Horizontal lanes going RIGHT (top side of center)
-            x = rand() % width;
-            y = centerY - numLanes - laneSpace + (lane - 6);
-            dir = Direction::RIGHT;
-        } else {
-            // Horizontal lanes going LEFT (bottom side of center)
-            x = rand() % width;
-            y = centerY + (lane - 9);
+            fixedCoord = centerX + laneNum; // x
+            startPos = height - 1; // y=height-1 (bottom)
+            step = -1;
+            length = height;
+        } else if (dirStr == "LEFT") {
             dir = Direction::LEFT;
+            fixedCoord = centerY - numLanesNorth - westLaneSpace + laneNum; // y
+            startPos = width - 1; // x=width-1 (right)
+            step = -1;
+            length = width;
+        } else { // RIGHT
+            dir = Direction::RIGHT;
+            fixedCoord = centerY + laneNum; // y
+            startPos = 0; // x=0 (left)
+            step = 1;
+            length = width;
         }
-       
-        // Check if cell is valid and empty
-        if (x >= 0 && x < width && y >= 0 && y < height &&
-            !cells[y][x].hasCar() && !cells[y][x].hasTrafficLight()) {
-            int vel = rand() % (maxVelocity + 1);
-            cells[y][x].setCarVelocity(vel);
-            cells[y][x].setCarDirection(dir);
-            cells[y][x].setCarId(nextCarId++);
-            carsSpawned++;
+
+        int placed = 0;
+        for (int pos = 0; pos < length && placed < numCars; ++pos) {
+            int curVar = startPos + pos * step;
+            int x = isVertical ? fixedCoord : curVar;
+            int y = isVertical ? curVar : fixedCoord;
+            if (x >= 0 && x < width && y >= 0 && y < height &&
+                !cells[y][x].hasCar() && !cells[y][x].hasTrafficLight()) {
+                int vel = rand() % (maxVelocity + 1);
+                cells[y][x].setCarVelocity(vel);
+                cells[y][x].setCarDirection(dir);
+                cells[y][x].setCarId(nextCarId++);
+                placed++;
+            }
         }
-        
-        Turn t;
-        t.direction = Direction::UP;
-        cells[50][50].setTurn(t);
+    };
+
+    // Place in west vertical (DOWN)
+    for (int lane = 0; lane < numLanesWest; ++lane) {
+        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
+        placeInLane(num, lane, "DOWN");
+        laneIndex++;
     }
+    // Place in east vertical (UP)
+    for (int lane = 0; lane < numLanesEast; ++lane) {
+        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
+        placeInLane(num, lane, "UP");
+        laneIndex++;
+    }
+    // Place in north horizontal (LEFT)
+    for (int lane = 0; lane < numLanesNorth; ++lane) {
+        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
+        placeInLane(num, lane, "LEFT");
+        laneIndex++;
+    }
+    // Place in south horizontal (RIGHT)
+    for (int lane = 0; lane < numLanesSouth; ++lane) {
+        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
+        placeInLane(num, lane, "RIGHT");
+        laneIndex++;
+    }
+
+    // Example turn (unchanged)
+    Turn t;
+    t.direction = Direction::UP;
+    cells[50][50].setTurn(t);
 }
 
 void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
-    int numLanes = 3;
+    int numLanesWest = 3;
+    int numLanesEast = 3;
+    int numLanesNorth = 3;
+    int numLanesSouth = 2;
     int laneSpace = 1;
     int centerX = width / 2;
     int centerY = height / 2;
-   
-    // Traffic lights for vertical lanes (going DOWN) - place just before intersection
-    for (int lane = 0; lane < numLanes; lane++) {
-        int x = centerX - numLanes - laneSpace + lane;
-        int y = centerY - numLanes - laneSpace - 1; // Adjusted for space
-       
+
+    // Traffic lights for vertical DOWN (west, from north)
+    for (int lane = 0; lane < numLanesWest; lane++) {
+        int x = centerX - numLanesWest - laneSpace + lane;
+        int y = centerY - numLanesNorth - laneSpace - 1;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
-            tl.state = TrafficLight::GREEN; // Vertical starts GREEN
-            tl.redDuration = redDur;
-            tl.yellowDuration = yellowDur;
-            tl.greenDuration = greenDur;
-            tl.timer = 0;
-            cells[y][x].setTrafficLight(tl);
-        }
-    }
-   
-    // Traffic lights for vertical lanes (going UP) - place just before intersection
-    for (int lane = 0; lane < numLanes; lane++) {
-        int x = centerX + lane;
-        int y = centerY + numLanes; // Unchanged, as space is above
-       
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            TrafficLight tl;
-            tl.state = TrafficLight::GREEN; // Vertical starts GREEN
+            tl.state = TrafficLight::GREEN;
             tl.redDuration = redDur;
             tl.yellowDuration = yellowDur;
             tl.greenDuration = greenDur;
@@ -134,14 +228,13 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         }
     }
 
-    // Traffic lights for horizontal lanes (going RIGHT) - place just before intersection
-    for (int lane = 0; lane < numLanes; lane++) {
-        int y = centerY - numLanes - laneSpace + lane;
-        int x = centerX - numLanes - laneSpace - 1; // Adjusted for space
-       
+    // Traffic lights for vertical UP (east, from south)
+    for (int lane = 0; lane < numLanesEast; lane++) {
+        int x = centerX + lane;
+        int y = centerY + numLanesSouth + laneSpace;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
-            tl.state = TrafficLight::RED; // Horizontal starts RED
+            tl.state = TrafficLight::GREEN;
             tl.redDuration = redDur;
             tl.yellowDuration = yellowDur;
             tl.greenDuration = greenDur;
@@ -149,15 +242,29 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             cells[y][x].setTrafficLight(tl);
         }
     }
-   
-    // Traffic lights for horizontal lanes (going LEFT) - place just before intersection
-    for (int lane = 0; lane < numLanes; lane++) {
-        int y = centerY + lane;
-        int x = centerX + numLanes;
-       
+
+    // Traffic lights for horizontal LEFT (north, from east)
+    for (int lane = 0; lane < numLanesNorth; lane++) {
+        int y = centerY - numLanesNorth - laneSpace + lane;
+        int x = centerX + numLanesEast + laneSpace;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
-            tl.state = TrafficLight::RED; // Horizontal starts RED
+            tl.state = TrafficLight::RED;
+            tl.redDuration = redDur;
+            tl.yellowDuration = yellowDur;
+            tl.greenDuration = greenDur;
+            tl.timer = 0;
+            cells[y][x].setTrafficLight(tl);
+        }
+    }
+
+    // Traffic lights for horizontal RIGHT (south, from west)
+    for (int lane = 0; lane < numLanesSouth; lane++) {
+        int y = centerY + lane;
+        int x = centerX - numLanesWest - laneSpace - 1;
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            TrafficLight tl;
+            tl.state = TrafficLight::RED;
             tl.redDuration = redDur;
             tl.yellowDuration = yellowDur;
             tl.greenDuration = greenDur;
