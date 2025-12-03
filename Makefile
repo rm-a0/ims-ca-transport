@@ -27,10 +27,15 @@ run: $(TARGET)
 clean:
 	rm -rf $(BUILDDIR) $(TARGET)
 
-runviz: $(TARGET)
-	rm -rf viz/ output.gif
+runvizmp4: $(TARGET)
+	rm -rf viz/ output.gif output.mp4
 	./$(TARGET) -v
 	ffmpeg -i viz/frame_%05d.ppm -r 5 output.mp4 -y
+
+runvizgif: $(TARGET)
+	rm -rf viz/ output.gif output.mp4
+	./$(TARGET) -v
+	ffmpeg -i viz/frame_%05d.ppm -r 5 output.gif -y
 
 cleanviz:
 	rm -rf viz/ output.gif
