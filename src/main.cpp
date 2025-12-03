@@ -23,14 +23,14 @@ int main(int argc, char* argv[]) {
     
     Grid grid(parser.getWidth(), parser.getHeight());
     grid.setupCrossroadLights(25, 0, 20);
-    grid.initializeCarsWithDensity(parser.getDensity(), parser.getVMax());
+    grid.initializeMap(parser.getDensity());
     
     NSRules rules;
     
     std::cout << "Step, AvgVelocity" << std::endl;
     
     for (int step = 0; step < parser.getSteps(); step++) {
-        grid.update(rules, parser.getVMax(), parser.getProb());
+        grid.update(rules, parser.getDensity(), parser.getVMax(), parser.getProb());
         
         double avgVel = grid.averageVelocity();
         std::cout << step << ", " << avgVel << std::endl;

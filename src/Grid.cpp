@@ -9,6 +9,7 @@
 #include "Utils.hpp"
 #include <cmath>
 #include <map>
+#include <iostream>
 
 Grid::Grid(int w, int h) : width(w), height(h) {
     cells.resize(height, std::vector<Cell>(width));
@@ -17,14 +18,13 @@ Grid::Grid(int w, int h) : width(w), height(h) {
             cells[y][x] = Cell(); // empty
 }
 
-void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
+void Grid::initializeMap(double density) {
     int centerX = width / 2;
     int centerY = height / 2;
 
     int totalLanes = numLanesNorth + numLanesWest + numLanesSouth + numLanesEast;
-
-    int totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
-    int targetCars = static_cast<int>(totalLaneCells * density);
+    totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
+    maxCars = static_cast<int>(totalLaneCells * density);
 
     // Number of cells per direction (northHeight will go to the southOut end of the junction)
     int northHeight = centerY + numLanesWestIn;
@@ -33,7 +33,7 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
     int eastWidth = centerX - numLanesNorthIn;
 
 
-    // === MARK ROAD CELLS AS ALIVE ===
+    // === MARK ROAD CELLS AS ALIVE AND SET SPAWN POINTS ===
 
     // VERTICAL ROADS (North-South)
     // North inbound: top side, cars going DOWN -> left of center (x < centerX)
@@ -107,83 +107,6 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
         if (y < 0 || y >= height) continue;
         for (int x = width - 1; x > eastWidth; x--)
             cells[y][x].setAlive(true);
-    }
-
-    // Calculate cars per lane
-    int carsPerLane = targetCars / totalLanes;
-    int extras = targetCars % totalLanes;
-    int laneIndex = 0;
-
-    // Lambda to place cars packed at the edge
-    auto placeInLane = [&](int numCars, int laneNum, std::string dirStr) {
-        Direction dir;
-        int fixedCoord, startPos, step, length;
-        bool isVertical = (dirStr == "DOWN" || dirStr == "UP");
-        if (dirStr == "DOWN") {
-            dir = Direction::DOWN;
-            fixedCoord = centerX - numLanesWest - eastLaneSpace + laneNum; // x
-            startPos = 0; // y=0 (top)
-            step = 1;
-            length = height;
-        } else if (dirStr == "UP") {
-            dir = Direction::UP;
-            fixedCoord = centerX + laneNum; // x
-            startPos = height - 1; // y=height-1 (bottom)
-            step = -1;
-            length = height;
-        } else if (dirStr == "LEFT") {
-            dir = Direction::LEFT;
-            fixedCoord = centerY - numLanesNorth - westLaneSpace + laneNum; // y
-            startPos = width - 1; // x=width-1 (right)
-            step = -1;
-            length = width;
-        } else { // RIGHT
-            dir = Direction::RIGHT;
-            fixedCoord = centerY + laneNum; // y
-            startPos = 0; // x=0 (left)
-            step = 1;
-            length = width;
-        }
-
-        int placed = 0;
-        for (int pos = 0; pos < length && placed < numCars; ++pos) {
-            int curVar = startPos + pos * step;
-            int x = isVertical ? fixedCoord : curVar;
-            int y = isVertical ? curVar : fixedCoord;
-            if (x >= 0 && x < width && y >= 0 && y < height &&
-                !cells[y][x].hasCar() && !cells[y][x].hasTrafficLight()) {
-                int vel = rand() % (maxVelocity + 1);
-                cells[y][x].setCarVelocity(vel);
-                cells[y][x].setCarDirection(dir);
-                cells[y][x].setCarId(nextCarId++);
-                placed++;
-            }
-        }
-    };
-
-    // Place in west vertical (DOWN)
-    for (int lane = 0; lane < numLanesWest; ++lane) {
-        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
-        placeInLane(num, lane, "DOWN");
-        laneIndex++;
-    }
-    // Place in east vertical (UP)
-    for (int lane = 0; lane < numLanesEast; ++lane) {
-        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
-        placeInLane(num, lane, "UP");
-        laneIndex++;
-    }
-    // Place in north horizontal (LEFT)
-    for (int lane = 0; lane < numLanesNorth; ++lane) {
-        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
-        placeInLane(num, lane, "LEFT");
-        laneIndex++;
-    }
-    // Place in south horizontal (RIGHT)
-    for (int lane = 0; lane < numLanesSouth; ++lane) {
-        int num = carsPerLane + (laneIndex < extras ? 1 : 0);
-        placeInLane(num, lane, "RIGHT");
-        laneIndex++;
     }
 
     // Turn blocks at the junction
@@ -280,9 +203,8 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
     }
 }
 
-void Grid::update(const Rules& rules, int vmax, double p) {
+void Grid::update(const Rules& rules, double density, int vmax, double p) {
     std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell()));
-   
     // Copy traffic lights and turns to next state
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -294,6 +216,10 @@ void Grid::update(const Rules& rules, int vmax, double p) {
                 next[y][x].setTurn(*cells[y][x].getTurn());
             }
             if (cells[y][x].isSpawnPoint()) {
+                double r = rand() / double(RAND_MAX);
+                if (currentCars < maxCars && r <= spawnProb)
+                    next[y][x].spawnCar(vmax, willTurnProb, nextCarId++, getInitialDirection(x, y));
+                    currentCars++;
                 next[y][x].setSpawnPoint(true);
             }
             if (cells[y][x].isAlive()) {
@@ -570,4 +496,27 @@ double Grid::averageVelocity() const {
         }
     }
     return carCount > 0 ? (double)totalVel / carCount : 0.0;
+}
+
+Direction Grid::getInitialDirection(int x, int y) {
+    int centerX = width / 2;
+    int centerY = height / 2;
+
+    // Determine direction based on position relative to center
+    // I. quadrant
+    if (x > centerX && y < centerY) {
+        return Direction::LEFT; // East inbound
+    }
+    // II. quadrant
+    else if (x < centerX && y < centerY) {
+        return Direction::DOWN; // North inbound
+    }
+    // III. quadrant
+    else if (x < centerX && y >= centerY) {
+        return Direction::RIGHT; // West inbound
+    }
+    // IV. quadrant
+    else if (x >= centerX && y > centerY) {
+        return Direction::UP; // South inbound
+    }
 }

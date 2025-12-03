@@ -4,6 +4,7 @@
  */
 
 #include "Cell.hpp"
+#include <cstdlib>
 
 void Cell::setCarDirection(Direction dir) {
     if (car.has_value())
@@ -80,4 +81,13 @@ void Cell::moveCarTo(Cell& dest) {
     if (!car.has_value()) return;
     dest.setCar(*car);
     removeCar();
+}
+
+void Cell::spawnCar(int vmax, double willTurnProb, int id, Direction dir) {
+    bool willTurn = false;
+    int velocity = rand() % (vmax + 1);
+    double r = rand() / double(RAND_MAX);
+    if (r <= willTurnProb)
+        willTurn = true;
+    car = Car{id, velocity, dir, willTurn};
 }

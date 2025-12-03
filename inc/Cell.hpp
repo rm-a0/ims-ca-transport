@@ -54,6 +54,7 @@ public:
     /** spawnPoint setter/getter */
     void setSpawnPoint(bool val) { spawnPoint = val; }
     bool isSpawnPoint() const { return spawnPoint; }
+    void spawnCar(int vmax, double willTurnProb, int id, Direction dir);
 
     int getEffectiveVelocity() const;
 

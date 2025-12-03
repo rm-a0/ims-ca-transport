@@ -23,19 +23,14 @@ public:
     Grid(int w, int h);
 
     void setupCrossroadLights(int redDur, int yellowDur, int greenDur);
-    void initializeCarsWithDensity(double density, int maxVelocity);
-    /**
-     * @brief Spawns cars at the corners of grid
-     * @param velocity Initial velocity of the car
-     */
-    void spawnCars(int velocity);
+    void initializeMap(double density);
     /**
      * @brief Updates the grid using specified rules (NS for traffic)
      * @param rules Rules to be applied
      * @param vmax Max velocity
      * @param p Braking probability
      */
-    void update(const Rules& rules, int vmax, double p);
+    void update(const Rules& rules, double density, int vmax, double p);
     /**
      * @brief Finds distance to next car ahead (toroidal)
      * @param x X coordinate
@@ -75,6 +70,28 @@ public:
      * @return Height
      */
     int getHeight() const { return height; }
+
+    /**
+     * @brief Sets the maximum number of cars in the simulation
+     * @param mC Maximum number of cars
+     */
+    void setMaxCars(int mC) { maxCars = mC; }
+    /**
+     * @brief Gets the maximum number of cars in the simulation
+     * @return Maximum number of cars
+     */
+    int getMaxCars() const { return maxCars; }
+
+    /**
+     * @brief Gets the next unique car ID and increments the internal counter
+     * @return Next car ID
+     */
+    int getNextCarId() { return nextCarId++; }
+
+    /**
+     * 
+     */
+    Direction getInitialDirection(int x, int y);
     
 private:
     int width;                              ///< Width of the grid
@@ -102,5 +119,13 @@ private:
     int numLanesWest = numLanesWestIn + numLanesWestOut;
     int numLanesSouth = numLanesSouthIn + numLanesSouthOut;
     int numLanesEast = numLanesEastIn + numLanesEastOut;
+
+    int totalLaneCells;   ///< Total number of cells that are part of lanes
+    int maxCars;          ///< Maximum number of cars in the simulation
+    int currentCars = 0;  ///< Current number of cars in the simulation
+
+    double spawnProb = 0.2; ///< Probability of spawning a car at spawn point per update
+
+    double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 };
 #endif // GRID_HPP
