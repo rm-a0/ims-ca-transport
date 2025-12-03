@@ -36,15 +36,17 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
     // === MARK ROAD CELLS AS ALIVE ===
 
     // VERTICAL ROADS (North-South)
-    // North inbound: top side, cars going DOWN → left of center (x < centerX)
+    // North inbound: top side, cars going DOWN -> left of center (x < centerX)
     for (int lane = 0; lane < numLanesNorthIn; lane++) {
         int x = centerX - numLanesNorthIn + lane;
         if (x < 0 || x >= width) continue;
+        // Set the edge road cell as spawn point for all cars coming from north
+        cells[0][x].setSpawnPoint(true);
         for (int y = 0; y < northHeight; y++)
             cells[y][x].setAlive(true);
     }
 
-    // North outbound: top side, cars going UP → right of center
+    // North outbound: top side, cars going UP -> right of center (x > centerX)
     for (int lane = 0; lane < numLanesNorthOut; lane++) {
         int x = centerX + northLaneSpace + lane;
         if (x < 0 || x >= width) continue;
@@ -52,16 +54,18 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
             cells[y][x].setAlive(true);
     }
 
-    // South inbound: bottom side, cars going UP → right of center
-    for (int lane = 0; lane < numLanesSouthIn; ++lane) {
+    // South inbound: bottom side, cars going UP -> right of center (x > centerX)
+    for (int lane = 0; lane < numLanesSouthIn; lane++) {
         int x = centerX + lane;
         if (x < 0 || x >= width) continue;
+        // Set the edge road cell as spawn point for all cars coming from south
+        cells[height - 1][x].setSpawnPoint(true);
         for (int y = height - 1; y > southHeight; y--)
             cells[y][x].setAlive(true);
     }
 
-    // South outbound: bottom side, cars going DOWN → left of center
-    for (int lane = 0; lane < numLanesSouthOut; ++lane) {
+    // South outbound: bottom side, cars going DOWN -> left of center (x < centerX)
+    for (int lane = 0; lane < numLanesSouthOut; lane++) {
         int x = centerX - numLanesSouthOut - southLaneSpace + lane;
         if (x < 0 || x >= width) continue;
         for (int y = height - 1; y > southHeight; y--)
@@ -69,32 +73,36 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
     }
 
     // HORIZONTAL ROADS (West-East)
-    // West inbound: left side, cars going RIGHT → above center (y < centerY)
-    for (int lane = 0; lane < numLanesWestIn; ++lane) {
-        int y = centerY - numLanesWestIn - westLaneSpace + lane;
-        if (y < 0 || y >= height) continue;
-        for (int x = 0; x < westWidth; x++)
-            cells[y][x].setAlive(true);
-    }
-
-    // West outbound: left side, cars going LEFT → below center
-    for (int lane = 0; lane < numLanesWestOut; ++lane) {
+    // West inbound: left side, cars going RIGHT -> below center (y > centerY)
+    for (int lane = 0; lane < numLanesWestIn; lane++) {
         int y = centerY + lane;
         if (y < 0 || y >= height) continue;
+        // Set the edge road cell as spawn point for all cars coming from west
+        cells[y][0].setSpawnPoint(true);
         for (int x = 0; x < westWidth; x++)
             cells[y][x].setAlive(true);
     }
 
-    // East inbound: right side, cars going LEFT → below center
-    for (int lane = 0; lane < numLanesEastIn; ++lane) {
+    // West outbound: left side, cars going LEFT -> above center (y < centerY)
+    for (int lane = 0; lane < numLanesWestOut; lane++) {
+        int y = centerY - numLanesWestOut - westLaneSpace + lane;
+        if (y < 0 || y >= height) continue;
+        for (int x = 0; x < westWidth; x++)
+            cells[y][x].setAlive(true);
+    }
+
+    // East inbound: right side, cars going LEFT -> above center (y < centerY)
+    for (int lane = 0; lane < numLanesEastIn; lane++) {
         int y = centerY - numLanesEastIn - eastLaneSpace + lane;
         if (y < 0 || y >= width) continue;
+        // Set the edge road cell as spawn point for all cars coming from east
+        cells[y][width - 1].setSpawnPoint(true);
         for (int x = width - 1; x > eastWidth; x--)
             cells[y][x].setAlive(true);
     }
 
-    // East outbound: right side, cars going RIGHT → above center
-    for (int lane = 0; lane < numLanesEastOut; ++lane) {
+    // East outbound: right side, cars going RIGHT -> below center (y > centerY)
+    for (int lane = 0; lane < numLanesEastOut; lane++) {
         int y = centerY + lane;
         if (y < 0 || y >= height) continue;
         for (int x = width - 1; x > eastWidth; x--)
@@ -290,9 +298,12 @@ void Grid::update(const Rules& rules, int vmax, double p) {
             if (cells[y][x].hasTurn()) {
                 next[y][x].setTurn(*cells[y][x].getTurn());
             }
+            if (cells[y][x].isSpawnPoint()) {
+                next[y][x].setSpawnPoint(true);
+            }
             if (cells[y][x].isAlive()) {
-            next[y][x].setAlive(true);
-        }
+                next[y][x].setAlive(true);
+            }
         }
     }
    
@@ -428,6 +439,10 @@ void Grid::exportPPM(const std::string& filename, int scale, int vmax) const {
             // Check for turn
             else if (cells[cellY][cellX].hasTurn()) {
                 r = 255; g = 255; b = 255;
+            }
+            // Check for spawn point
+            else if (cells[cellY][cellX].isSpawnPoint()) {
+                r = 0; g = 0; b = 255;
             }
             // Check for alive cell (road)
             else if (cells[cellY][cellX].isAlive()) {

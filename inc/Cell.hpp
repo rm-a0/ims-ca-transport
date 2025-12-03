@@ -51,6 +51,10 @@ public:
     void setAlive(bool val) { alive = val; }
     bool isAlive() const { return alive; }
 
+    /** spawnPoint setter/getter */
+    void setSpawnPoint(bool val) { spawnPoint = val; }
+    bool isSpawnPoint() const { return spawnPoint; }
+
     int getEffectiveVelocity() const;
 
     /** Car setters/getters */
@@ -82,6 +86,7 @@ private:
     std::optional<Car> car;
     std::optional<Turn> turn;
     std::optional<TrafficLight> tl;
+    bool spawnPoint = false;
     bool alive;
 };
 
