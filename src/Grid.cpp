@@ -216,18 +216,13 @@ void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
 }
 
 void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
-    int numLanesWest = 3;
-    int numLanesEast = 3;
-    int numLanesNorth = 3;
-    int numLanesSouth = 2;
-    int laneSpace = 1;
     int centerX = width / 2;
     int centerY = height / 2;
 
-    // Traffic lights for vertical DOWN (west, from north)
-    for (int lane = 0; lane < numLanesWest; lane++) {
-        int x = centerX - numLanesWest - laneSpace + lane;
-        int y = centerY - numLanesNorth - laneSpace - 1;
+    // Traffic lights for west inbound
+    for (int lane = 0; lane < numLanesWestIn; lane++) {
+        int x = centerX - numLanesNorthIn - northLaneSpace;
+        int y = centerY + lane;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::GREEN;
@@ -239,10 +234,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         }
     }
 
-    // Traffic lights for vertical UP (east, from south)
-    for (int lane = 0; lane < numLanesEast; lane++) {
-        int x = centerX + lane;
-        int y = centerY + numLanesSouth + laneSpace;
+    // Traffic lights for east inbound
+    for (int lane = 0; lane < numLanesEastIn; lane++) {
+        int x = centerX + numLanesSouthIn;
+        int y = centerY - numLanesEastIn - eastLaneSpace + lane;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::GREEN;
@@ -254,10 +249,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         }
     }
 
-    // Traffic lights for horizontal LEFT (north, from east)
-    for (int lane = 0; lane < numLanesNorth; lane++) {
-        int y = centerY - numLanesNorth - laneSpace + lane;
-        int x = centerX + numLanesEast + laneSpace;
+    // Traffic lights for north inbound
+    for (int lane = 0; lane < numLanesNorthIn; lane++) {
+        int y = centerY - numLanesEastIn - eastLaneSpace - 1;
+        int x = centerX - lane - northLaneSpace;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::RED;
@@ -269,10 +264,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         }
     }
 
-    // Traffic lights for horizontal RIGHT (south, from west)
-    for (int lane = 0; lane < numLanesSouth; lane++) {
-        int y = centerY + lane;
-        int x = centerX - numLanesWest - laneSpace - 1;
+    // Traffic lights south inbound
+    for (int lane = 0; lane < numLanesSouthIn; lane++) {
+        int y = centerY + numLanesWestIn;
+        int x = centerX + numLanesSouthIn - lane - 1;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::RED;

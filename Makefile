@@ -33,7 +33,7 @@ runvizmp4: $(TARGET)
 	ffmpeg -i viz/frame_%05d.ppm -r 5 output.mp4 -y
 
 runvizgif: $(TARGET)
-	rm -rf viz/ output.gif output.mp4
+	rm -rf viz/ output.mp4
 	./$(TARGET) -v
 	ffmpeg -i viz/frame_%05d.ppm -r 5 output.gif -y
 
