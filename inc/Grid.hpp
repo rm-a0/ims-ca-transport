@@ -77,9 +77,30 @@ public:
     int getHeight() const { return height; }
     
 private:
-    int width;                              ///< Width of the grid (road length)
-    int height;                             ///< Height of the grid (lanes)
+    int width;                              ///< Width of the grid
+    int height;                             ///< Height of the grid
     std::vector<std::vector<Cell>> cells;   ///< 2D vector containing cells
     int nextCarId = 0;                      ///< ID of the next car
+
+    int numLanesNorthIn = 3;  ///< From NORTH to SOUTH (towards junction)
+    int numLanesNorthOut = 2; ///< From SOUTH to NORTH (away from junction)
+    int numLanesWestIn = 2;   ///< From WEST to EAST (towards junction)
+    int numLanesWestOut = 2;  ///< From EAST to WEST (away from junction)
+    int numLanesSouthIn = 3;  ///< From SOUTH to NORTH (towards junction)
+    int numLanesSouthOut = 2; ///< From NORTH to SOUTH (away from junction)
+    int numLanesEastIn = 3;   ///< From EAST to WEST (towards junction)
+    int numLanesEastOut = 2;  ///< From WEST to EAST (away from junction)
+
+    // Lane spacing from center (between inbound and outbound)
+    int northLaneSpace = 1;
+    int westLaneSpace = 2;
+    int southLaneSpace = 1;
+    int eastLaneSpace = 1;
+
+    // Total number of lanes for each direction
+    int numLanesNorth = numLanesNorthIn + numLanesNorthOut;
+    int numLanesWest = numLanesWestIn + numLanesWestOut;
+    int numLanesSouth = numLanesSouthIn + numLanesSouthOut;
+    int numLanesEast = numLanesEastIn + numLanesEastOut;
 };
 #endif // GRID_HPP

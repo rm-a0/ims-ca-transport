@@ -18,36 +18,15 @@ Grid::Grid(int w, int h) : width(w), height(h) {
 }
 
 void Grid::initializeCarsWithDensity(double density, int maxVelocity) {
-    int numLanesNorthIn = 3;  // From NORTH to SOUTH (towards junction)
-    int numLanesNorthOut = 2; // From SOUTH to NORTH (away from junction)
-    int numLanesWestIn = 2;   // From WEST to EAST (towards junction)
-    int numLanesWestOut = 2;  // From EAST to WEST (away from junction)
-    int numLanesSouthIn = 3;  // From SOUTH to NORTH (towards junction)
-    int numLanesSouthOut = 2; // From NORTH to SOUTH (away from junction)
-    int numLanesEastIn = 3;   // From EAST to WEST (towards junction)
-    int numLanesEastOut = 2;  // From WEST to EAST (away from junction)
-
-    // Lane spacing from center (between inbound and outbound)
-    int northLaneSpace = 1;
-    int westLaneSpace = 2;
-    int southLaneSpace = 1;
-    int eastLaneSpace = 1;
-
     int centerX = width / 2;
     int centerY = height / 2;
-
-    // Total number of lanes for each direction
-    int numLanesNorth = numLanesNorthIn + numLanesNorthOut;
-    int numLanesWest = numLanesWestIn + numLanesWestOut;
-    int numLanesSouth = numLanesSouthIn + numLanesSouthOut;
-    int numLanesEast = numLanesEastIn + numLanesEastOut;
 
     int totalLanes = numLanesNorth + numLanesWest + numLanesSouth + numLanesEast;
 
     int totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
     int targetCars = static_cast<int>(totalLaneCells * density);
 
-    // Number of cells per direction (northInHeight will go to the southOut end of the junction)
+    // Number of cells per direction (northHeight will go to the southOut end of the junction)
     int northHeight = centerY + numLanesWestIn;
     int westWidth = centerX + numLanesSouthIn;
     int southHeight = centerY - numLanesEastIn;
