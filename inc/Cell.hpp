@@ -17,6 +17,7 @@ enum Direction {
 struct Car {
     int id;
     int velocity;
+    int waitingTime;
     Direction direction;
 };
 
@@ -62,6 +63,7 @@ public:
     int getCarId() const { return car ? car->id : -1; }
     bool hasCar() const { return car.has_value(); }
     void removeCar();
+    void updateWaitingTime();
 
     /** Road setters/getters */
     void setTurn(const Turn& t);

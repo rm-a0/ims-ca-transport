@@ -81,3 +81,9 @@ void Cell::moveCarTo(Cell& dest) {
     dest.setCar(*car);
     removeCar();
 }
+
+void Cell::updateWaitingTime() {
+    if (!hasCar()) return;
+    if (getCarVelocity() == 0)
+        car->waitingTime++;
+}

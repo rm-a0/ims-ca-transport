@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         if (parser.isVizEnabled()) {
             std::ostringstream ss;
             ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
-            grid.exportPPM(ss.str(), 10, parser.getVMax());
+            grid.exportPPM(ss.str(), 8, parser.getVMax());
         }
     }
     
