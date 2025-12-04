@@ -134,6 +134,6 @@ private:
 
     double spawnProb = 0.2; ///< Probability of spawning a car at spawn point per update
 
-    double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
+    double willTurnProb = 0.1; ///< Probability that a car will turn at the next turn block
 };
 #endif // GRID_HPP

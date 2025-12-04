@@ -216,10 +216,10 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
                 next[y][x].setTurn(*cells[y][x].getTurn());
             }
             if (cells[y][x].isSpawnPoint()) {
-                bool willTurnProbablity = calculateWillTurnProbability(x, y);
+                double willTurnProbability = calculateWillTurnProbability(x, y);
                 double r = rand() / double(RAND_MAX);
                 if (currentCars < maxCars && r <= spawnProb) {
-                    next[y][x].spawnCar(vmax, willTurnProbablity, nextCarId++, getInitialDirection(x, y));
+                    next[y][x].spawnCar(vmax, willTurnProbability, nextCarId++, getInitialDirection(x, y));
                     currentCars++;
                 }
                 next[y][x].setSpawnPoint(true);
@@ -272,8 +272,6 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
             if (newX >= width || newX < 0 || newY >= height || newY < 0) {
                 cells[y][x].removeCar();
                 currentCars--;
-                std::cout << "Car " << cells[y][x].getCarId() << " has left the grid." << std::endl;
-                std::cout << "Current cars: " << currentCars << " | " << "Max cars: " << maxCars << std::endl;
                 continue;
             }
            
