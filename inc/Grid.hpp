@@ -97,15 +97,39 @@ public:
     double calculateWillTurnProbability(int x, int y);
 
     /**
-     * 
+     * @brief Determines the initial direction of a car spawned at (x, y)
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @return Direction enum value representing initial direction
      */
     Direction getInitialDirection(int x, int y);
+
+    /**
+     * @brief Creates right turn lanes at the junction
+     * @param x X coordinate of the turn block
+     * @param y Y coordinate of the turn block
+     * @param fromDir Direction from which the car is coming
+     * @param distFromTrafficLight Distance from the traffic light to the turn block
+     */
+    void createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight);
     
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid
     std::vector<std::vector<Cell>> cells;   ///< 2D vector containing cells
     int nextCarId = 0;                      ///< ID of the next car
+
+    // Traffic light durations (yellow is calculated from green -> 90% green / 10% yellow)
+    int northInRedDuration = 0;             ///< Red light duration for north inbound
+    int northInGreenDuration = 100;         ///< Green light duration for north inbound
+    int southInRedDuration = 100;           ///< Red light duration for south inbound
+    int southInGreenDuration = 0;           ///< Green light duration for south inbound
+    int westInRedDuration = 100;            ///< Red light duration for west inbound
+    int westInGreenDuration = 0;            ///< Green light duration for west inbound
+    int eastInStraightRedDuration = 100;    ///< Red light duration for east inbound (straight)
+    int eastInStraightGreenDuration = 0;    ///< Green light duration for east inbound (straight)
+    int eastInTurnRedDuration = 100;        ///< Red light duration for east inbound (left turn)
+    int eastInTurnGreenDuration = 0;        ///< Green light duration for east inbound (left turn)
 
     int numLanesNorthIn = 3;  ///< From NORTH to SOUTH (towards junction)
     int numLanesNorthOut = 2; ///< From SOUTH to NORTH (away from junction)
@@ -132,8 +156,11 @@ private:
     int maxCars;          ///< Maximum number of cars in the simulation
     int currentCars = 0;  ///< Current number of cars in the simulation
 
+    int distFromTrafficLight = 10; ///< Distance from traffic light to turn block for right lane turns
+
     double spawnProb = 0.2; ///< Probability of spawning a car at spawn point per update
 
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 };
+
 #endif // GRID_HPP

@@ -51,7 +51,7 @@ private:
     int steps = 100;            ///< Number of steps
     int width = 100;            ///< Grid width (road length)
     int height = 100;           ///< Grid height (lanes)
-    int vmax = 5;               ///< Max velocity
+    int vmax = 3;               ///< Max velocity
     double prob = 0.3;          ///< Braking probability
     double density = 0.2;       ///< Initial car density (0-1)
 };

@@ -22,7 +22,6 @@ void Grid::initializeMap(double density) {
     int centerX = width / 2;
     int centerY = height / 2;
 
-    int totalLanes = numLanesNorth + numLanesWest + numLanesSouth + numLanesEast;
     totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
     maxCars = static_cast<int>(totalLaneCells * density);
 
@@ -154,6 +153,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             tl.greenDuration = greenDur;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
+            // Create right turn lane
+            if (lane == numLanesWestIn - 1) {
+                createRightTurnLanes(x, y, Direction::LEFT, distFromTrafficLight);
+            }
         }
     }
 
@@ -169,6 +172,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             tl.greenDuration = greenDur;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
+            // Create right turn lane
+            if (lane == 0) {
+                createRightTurnLanes(x, y, Direction::RIGHT, distFromTrafficLight);
+            }
         }
     }
 
@@ -184,6 +191,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             tl.greenDuration = greenDur;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
+            // Create right turn lane
+            if (lane == numLanesNorthIn - 1) {
+                createRightTurnLanes(x, y, Direction::UP, distFromTrafficLight);
+            }
         }
     }
 
@@ -199,6 +210,10 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             tl.greenDuration = greenDur;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
+            // Create right turn lane
+            if (lane == 0) {
+                createRightTurnLanes(x, y, Direction::DOWN, distFromTrafficLight);
+            }
         }
     }
 }
@@ -565,4 +580,115 @@ double Grid::calculateWillTurnProbability(int x, int y) {
         return 1.0;
     }
     return willTurnProb;
+}
+
+void Grid::createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight) {
+    Turn t0;
+    Turn t1;
+    Turn t2;
+    Turn t3;
+    t0.direction = Direction::LEFT;
+    t1.direction = Direction::DOWN;
+    t2.direction = Direction::RIGHT;
+    t3.direction = Direction::UP;
+    // Create right turn lane for north inbound
+    if (fromDir == Direction::UP) {
+        int newX = x - distFromTrafficLight;
+        int newY = y - distFromTrafficLight;
+        if (newX < 0 || newY < 0) return;
+        // 1st turn block
+        cells[newY][x].setTurn(t0);
+
+        // Create seperate lane for right turn (horizontal part)
+        for (int i = 0; i <= distFromTrafficLight; i++) {
+            if (i == distFromTrafficLight) {
+                cells[newY][x - i].setTurn(t1);
+                continue;
+            }
+            cells[newY][x - i].setAlive(true);
+        }
+        // Create vertical part of the right turn lane
+        for (int i = 0; i <= distFromTrafficLight + 1; i++) {
+            if (i == distFromTrafficLight + 1) {
+                cells[newY + i][newX].setTurn(t0);
+                continue;
+            }
+            cells[newY + i][newX].setAlive(true);
+        }
+    }
+    // Create right turn lane for south inbound
+    else if (fromDir == Direction::DOWN) {
+        int newX = x + distFromTrafficLight;
+        int newY = y + distFromTrafficLight;
+        if (newX < 0 || newY < 0) return;
+        // 1st turn block
+        cells[newY][x].setTurn(t2);
+
+        // Create seperate lane for right turn (horizontal part)
+        for (int i = 0; i <= distFromTrafficLight; i++) {
+            if (i == distFromTrafficLight) {
+                cells[newY][x + i].setTurn(t3);
+                continue;
+            }
+            cells[newY][x + i].setAlive(true);
+        }
+        // Create vertical part of the right turn lane
+        for (int i = 0; i <= distFromTrafficLight + 1; i++) {
+            if (i == distFromTrafficLight + 1) {
+                cells[newY - i][newX].setTurn(t2);
+                continue;
+            }
+            cells[newY - i][newX].setAlive(true);
+        }
+    }
+    // Create right turn lane for west inbound
+    else if (fromDir == Direction::LEFT) {
+        int newX = x - distFromTrafficLight;
+        int newY = y + distFromTrafficLight;
+        if (newX < 0 || newY < 0) return;
+        // 1st turn block
+        cells[y][newX].setTurn(t1);
+
+        // Create seperate lane for right turn (vertical part)
+        for (int i = 0; i <= distFromTrafficLight; i++) {
+            if (i == distFromTrafficLight) {
+                cells[y + i][newX].setTurn(t2);
+                continue;
+            }
+            cells[y + i][newX].setAlive(true);
+        }
+        // Create horizontal part of the right turn lane
+        for (int i = 0; i <= distFromTrafficLight + 1; i++) {
+            if (i == distFromTrafficLight + 1) {
+                cells[newY][newX + i].setTurn(t1);
+                continue;
+            }
+            cells[newY][newX + i].setAlive(true);
+        }
+    }
+    // Create right turn lane for east inbound
+    else if (fromDir == Direction::RIGHT) {
+        int newX = x + distFromTrafficLight;
+        int newY = y - distFromTrafficLight;
+        if (newX < 0 || newY < 0) return;
+        // 1st turn block
+        cells[y][newX].setTurn(t3);
+
+        // Create seperate lane for right turn (vertical part)
+        for (int i = 0; i <= distFromTrafficLight; i++) {
+            if (i == distFromTrafficLight) {
+                cells[y - i][newX].setTurn(t0);
+                continue;
+            }
+            cells[y - i][newX].setAlive(true);
+        }
+        // Create horizontal part of the right turn lane
+        for (int i = 0; i <= distFromTrafficLight + 1; i++) {
+            if (i == distFromTrafficLight + 1) {
+                cells[newY][newX - i].setTurn(t3);
+                continue;
+            }
+            cells[newY][newX - i].setAlive(true);
+        }
+    }
 }
