@@ -63,9 +63,11 @@ public:
     void setCarVelocity(int v);
     void setCarId(int id);
     void setCarDirection(Direction dir);
+    void setCarWillTurn(bool val);
     Direction getCarDirection() const { return car ? car-> direction : Direction::RIGHT; }
     int getCarVelocity() const { return car ? car->velocity : -1; }
     int getCarId() const { return car ? car->id : -1; }
+    bool getCarWillTurn() const { return car ? car->willTurn : false; }
     bool hasCar() const { return car.has_value(); }
     void removeCar();
 

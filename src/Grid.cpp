@@ -216,10 +216,12 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
                 next[y][x].setTurn(*cells[y][x].getTurn());
             }
             if (cells[y][x].isSpawnPoint()) {
+                bool willTurnProbablity = calculateWillTurnProbability(x, y);
                 double r = rand() / double(RAND_MAX);
-                if (currentCars < maxCars && r <= spawnProb)
-                    next[y][x].spawnCar(vmax, willTurnProb, nextCarId++, getInitialDirection(x, y));
+                if (currentCars < maxCars && r <= spawnProb) {
+                    next[y][x].spawnCar(vmax, willTurnProbablity, nextCarId++, getInitialDirection(x, y));
                     currentCars++;
+                }
                 next[y][x].setSpawnPoint(true);
             }
             if (cells[y][x].isAlive()) {
@@ -235,6 +237,7 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
         int newVel;
         int carId;
         Direction dir;
+        bool willTurn;
     };
     std::vector<CarMove> moves;
    
@@ -259,20 +262,30 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
             int newY = y;
            
             if (dx != 0) {
-                newX = (x + newVel * dx + width) % width;
+                newX = x + newVel * dx;
             }
             if (dy != 0) {
-                newY = (y + newVel * dy + height) % height;
+                newY = y + newVel * dy;
+            }
+
+            // Check if the car is leaving the grid (if so then remove it)
+            if (newX >= width || newX < 0 || newY >= height || newY < 0) {
+                cells[y][x].removeCar();
+                currentCars--;
+                std::cout << "Car " << cells[y][x].getCarId() << " has left the grid." << std::endl;
+                std::cout << "Current cars: " << currentCars << " | " << "Max cars: " << maxCars << std::endl;
+                continue;
             }
            
-            moves.push_back({x, y, newX, newY, newVel, cells[y][x].getCarId(), dir});
+            moves.push_back({x, y, newX, newY, newVel, cells[y][x].getCarId(), dir, cells[y][x].getCarWillTurn()});
         }
     }
    
     // Second pass: Apply moves, checking for conflicts
     for (const auto& move : moves) {
+        bool turn = cells[move.oldY][move.oldX].getCarWillTurn();
         cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
-        if (next[move.newY][move.newX].hasTurn())
+        if (next[move.newY][move.newX].hasTurn() && turn)
             next[move.newY][move.newX].setCarDirection(next[move.newY][move.newX].getTurnDirection());
         next[move.newY][move.newX].setCarVelocity(move.newVel);
     }
@@ -299,8 +312,13 @@ int Grid::distanceToNextCar(int x, int y) const {
     int cy = y;
   
     while (dist < loop_size) {
-        cx = (cx + dx + width) % width;
-        cy = (cy + dy + height) % height;
+        cx = cx + dx;
+        cy = cy + dy;
+
+        if (cx >= width || cx < 0 || cy >= height || cy < 0) {
+            // Out of bounds
+            return dx != 0 ? width : height;
+        }
       
         // Check for red traffic light
         if (cells[cy][cx].hasTrafficLight()) {
@@ -314,7 +332,7 @@ int Grid::distanceToNextCar(int x, int y) const {
             return dist;
         }
 
-        if (cells[cy][cx].hasTurn()) {
+        if (cells[cy][cx].hasTurn() && cells[y][x].getCarWillTurn()) {
             return dist + 1;
         }
       
@@ -519,4 +537,34 @@ Direction Grid::getInitialDirection(int x, int y) {
     else if (x >= centerX && y > centerY) {
         return Direction::UP; // South inbound
     }
+}
+
+double Grid::calculateWillTurnProbability(int x, int y) {
+    int centerX = width / 2;
+    int centerY = height / 2;
+    // NORTH INBOUND straight only lane (48, 0)
+    if (x == (centerX - northLaneSpace - 1) && y == 0) {
+        return 0.0;
+    }
+    // NORTH INBOUND turn only lane (49, 0)
+    if (x == (centerX - northLaneSpace) && y == 0) {
+        return 1.0;
+    }
+    // EAST INBOUND straight only lane (99, 47)
+    if (x == (width - 1) && y == (centerY - eastLaneSpace - 2)) {
+        return 0.0;
+    }
+    // EAST INBOUND turn only lane (99, 48)
+    if (x == (width - 1) && y == (centerY - eastLaneSpace - 1)) {
+        return 1.0;
+    }
+    // WEST INBOUND straight only lane (0, 50)
+    if (x == 0 && y == centerY) {
+        return 0.0;
+    }
+    // SOUTH INBOUND turn only lane (50, 99)
+    if (x == centerX && y == (height - 1)) {
+        return 1.0;
+    }
+    return willTurnProb;
 }

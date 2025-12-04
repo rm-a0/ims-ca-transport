@@ -89,6 +89,14 @@ public:
     int getNextCarId() { return nextCarId++; }
 
     /**
+     * @brief Determines if a car spawned at (x, y) will turn at the next turn block
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @return 0.0 if on a straight only lane, 1.0 if on a turn only lane, default willTurnProb otherwise
+     */
+    double calculateWillTurnProbability(int x, int y);
+
+    /**
      * 
      */
     Direction getInitialDirection(int x, int y);

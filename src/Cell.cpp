@@ -28,6 +28,10 @@ void Cell::setCarId(int id) {
         car->id = id;
 }
 
+void Cell::setCarWillTurn(bool val) {
+    car->willTurn = val;
+}
+
 void Cell::removeCar() {
     car.reset();
 }
