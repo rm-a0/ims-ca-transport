@@ -2,5 +2,6 @@
 build/
 main
 viz/
+data/
 *.mp4
 *.gif
