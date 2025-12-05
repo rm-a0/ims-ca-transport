@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
         std::filesystem::create_directories(parser.getVizDir());
     
     Grid grid(parser.getWidth(), parser.getHeight());
+    grid.initializeMap(parser.getDensity(), parser.getOptimize());
     grid.setupCrossroadLights(25, 0, 20);
-    grid.initializeMap(parser.getDensity());
     
     NSRules rules;
     

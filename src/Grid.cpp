@@ -18,7 +18,13 @@ Grid::Grid(int w, int h) : width(w), height(h) {
             cells[y][x] = Cell(); // empty
 }
 
-void Grid::initializeMap(double density) {
+void Grid::initializeMap(double density, bool opt) {
+    if (opt) {
+        numLanesEastIn = 4;
+        numLanesWestOut = 3;
+        normalize = true;
+    }
+
     int centerX = width / 2;
     int centerY = height / 2;
 
@@ -562,6 +568,10 @@ double Grid::calculateWillTurnProbability(int x, int y) {
     // NORTH INBOUND turn only lane (49, 0)
     if (x == (centerX - northLaneSpace) && y == 0) {
         return 1.0;
+    }
+    // EAST INBOUND straight only lane (99, 46) [only with --optimize]
+    if (normalize && x == (width - 1) && y == (centerY - eastLaneSpace - 3)) {
+        return 0.0;
     }
     // EAST INBOUND straight only lane (99, 47)
     if (x == (width - 1) && y == (centerY - eastLaneSpace - 2)) {

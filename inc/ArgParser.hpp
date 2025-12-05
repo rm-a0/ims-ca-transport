@@ -42,6 +42,7 @@ public:
     int getVMax() const { return vmax; }
     double getProb() const { return prob; }
     double getDensity() const { return density; }
+    bool getOptimize() const { return optimize; }
 
 private:
     size_t argc;                ///< Argument count
@@ -54,6 +55,7 @@ private:
     int vmax = 3;               ///< Max velocity
     double prob = 0.3;          ///< Braking probability
     double density = 0.2;       ///< Initial car density (0-1)
+    bool optimize = false;      ///< Add straight lane to east inbound and west outbound if true
 };
 
 #endif // ARG_PARSER_HPP

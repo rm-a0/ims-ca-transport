@@ -87,6 +87,10 @@ bool ArgParser::parse() {
                 return false;
             if (density < 0.0 || density > 1.0) return returnWithError("--density must be 0-1.");
         }
+        else if (arg == "-o" || "--optimize") {
+            optimize = true;
+            continue;
+        }
         else {
             std::cerr << "Unknown option: " << arg << "\n\n";
             displayHelp();
@@ -108,5 +112,6 @@ void ArgParser::displayHelp() {
         << "  -M, --maxspeed <n>        Max car velocity (>=0, default 5).\n"
         << "  -P, --prob <f>            Braking probability (random braking) (0-1, default 0.3).\n"
         << "  -D, --density <f>         Initial car density (0-1, default 0.2).\n"
+        << "  -O, --optimize            Adds an additional straight lane to east inbound and west outbound.\n"
         << "  -h, --help                Show this help message.\n";
 }

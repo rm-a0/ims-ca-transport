@@ -23,7 +23,7 @@ public:
     Grid(int w, int h);
 
     void setupCrossroadLights(int redDur, int yellowDur, int greenDur);
-    void initializeMap(double density);
+    void initializeMap(double density, bool opt);
     /**
      * @brief Updates the grid using specified rules (NS for traffic)
      * @param rules Rules to be applied
@@ -161,6 +161,8 @@ private:
     double spawnProb = 0.2; ///< Probability of spawning a car at spawn point per update
 
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
+
+    bool normalize = false; ///< If --optimize is set then this becomes 1 to shift all affected areas
 };
 
 #endif // GRID_HPP
