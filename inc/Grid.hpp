@@ -9,6 +9,10 @@
 #include <vector>
 #include <fstream>
 #include <string>
+
+#include <vector>
+#include <tuple>
+
 /**
  * @class Grid
  * @brief Represents a CA grid for traffic (1D road if height=1)
@@ -105,16 +109,11 @@ public:
      * @param distFromTrafficLight Distance from the traffic light to the turn block
      */
     void createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight);
-
-    const std::vector<int>& getFinishedCarsWaitingTimes() const { return finishedCarsWaitingTimes; }
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid
     std::vector<std::vector<Cell>> cells;   ///< 2D vector containing cells
     int nextCarId = 0;                      ///< ID of the next car
-
-    // Ploting variables
-    std::vector<int> finishedCarsWaitingTimes;
 
     // Traffic light durations (yellow is calculated from green -> 90% green / 10% yellow)
     int northInRedDuration = 0;             ///< Red light duration for north inbound

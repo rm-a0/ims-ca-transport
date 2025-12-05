@@ -6,6 +6,8 @@
 #include "Cell.hpp"
 #include <cstdlib>
 
+Cell::Cell() : car(std::nullopt), turn(std::nullopt), tl(std::nullopt), totalVelocity(0), alive(false), spawnPoint(false) {}
+
 void Cell::setCarDirection(Direction dir) {
     if (car.has_value())
         car->direction = dir;
@@ -93,13 +95,7 @@ void Cell::spawnCar(int vmax, double willTurnProb, int id, Direction dir) {
     double r = rand() / double(RAND_MAX);
     if (r <= willTurnProb)
         willTurn = true;
-    car = Car{id, velocity, 0, dir, willTurn};
-}
-
-void Cell::updateCarWaitingTime() {
-    if (!hasCar()) return;
-    if (getCarVelocity() == 0)
-        car->waitingTime++;
+    car = Car{id, velocity, dir, willTurn};
 }
 
 void Cell::updateTotalVelocity() {

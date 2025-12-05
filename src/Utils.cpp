@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <map>
 #include <filesystem>
+#include <iostream>
 
 /*
  * Turbo colormap
@@ -238,24 +239,5 @@ void Utils::exportSmoothPPM(const Grid& grid,
 void Utils::exportCSV(const Grid& grid, const std::string& dir, int steps) {
     std::filesystem::create_directories(dir);
 
-    std::ofstream carFile(dir + "/car_waiting_times.csv");
-    carFile << "car_id,waiting_time\n";
-    const auto& waitingTimes = grid.getFinishedCarsWaitingTimes();
-    for (size_t i = 0; i < waitingTimes.size(); ++i) {
-        carFile << i << "," << waitingTimes[i] << "\n";
-    }
-    carFile.close();
-
-    // --- Per-cell average velocity ---
-    std::ofstream cellFile(dir + "/cell_avg_velocity.csv");
-    int width = grid.getWidth();
-    int height = grid.getHeight();
-    cellFile << "x,y,avg_velocity\n";
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            double avgVel = grid.getCell(x, y).getTotalVelocity() / static_cast<double>(steps);
-            cellFile << x << "," << y << "," << avgVel << "\n";
-        }
-    }
-    cellFile.close();
+    std::ofstream file(dir + "/car_waiting_times.csv");
 }

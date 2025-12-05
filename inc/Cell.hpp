@@ -17,7 +17,6 @@ enum Direction {
 struct Car {
     int id;
     int velocity;
-    int waitingTime;
     Direction direction;
     bool willTurn = false; ///< Indicates if the car will turn at the next turn block
 };
@@ -44,7 +43,7 @@ struct TrafficLight {
 class Cell {
 public:
     /** Constructor */
-    Cell() : car(std::nullopt), turn(std::nullopt), tl(std::nullopt), alive(false) {}
+    Cell();
 
     void moveCarTo(Cell& dest);
 
@@ -71,8 +70,6 @@ public:
     bool getCarWillTurn() const { return car ? car->willTurn : false; }
     bool hasCar() const { return car.has_value(); }
     void removeCar();
-    void updateCarWaitingTime();
-    int getCarWaitingTime() const { return car ? car->waitingTime : -1; }
 
     /** Road setters/getters */
     void setTurn(const Turn& t);
@@ -95,7 +92,7 @@ private:
     std::optional<Car> car;
     std::optional<Turn> turn;
     std::optional<TrafficLight> tl;
-    long totalVelocity;
+    long totalVelocity = 0;
     bool spawnPoint = false;
     bool alive;
 };

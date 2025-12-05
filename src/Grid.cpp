@@ -274,7 +274,6 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
             
             // Update for logging and plotting pourposes
             cells[y][x].updateTotalVelocity();
-            cells[y][x].updateCarWaitingTime();
 
 
             int currentVel = cells[y][x].getCarVelocity();
@@ -296,9 +295,6 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
 
             // Check if the car is leaving the grid (if so then remove it)
             if (newX >= width || newX < 0 || newY >= height || newY < 0) {
-                int wait = cells[y][x].getCarWaitingTime();
-                finishedCarsWaitingTimes.push_back(wait);
-
                 cells[y][x].removeCar();
                 currentCars--;
                 continue;

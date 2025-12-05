@@ -5,3 +5,12 @@ viz/
 data/
 *.mp4
 *.gif
+*/venv/
+/__pycache__/
+/*.pyc
+/*.pyo
+/*.pyd
+*.idea/
+*.swp
+*.swo
+.DS_Store

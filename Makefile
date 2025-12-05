@@ -38,6 +38,6 @@ runvizgif: $(TARGET)
 	ffmpeg -i viz/frame_%05d.ppm -r 5 output.gif -y
 
 cleanviz:
-	rm -rf viz/ output.gif
+	rm -rf viz/ output.gif output.mp4
 
 .PHONY: all run clean
