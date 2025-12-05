@@ -28,8 +28,8 @@ void Grid::initializeMap(double density, bool opt) {
     int centerX = width / 2;
     int centerY = height / 2;
 
-    totalLaneCells = (numLanesWest + numLanesEast) * height + (numLanesNorth + numLanesSouth) * width;
-    maxCars = static_cast<int>(totalLaneCells * density);
+    totalInLaneCells = (numLanesWestIn + numLanesEastIn) * height + (numLanesNorthIn + numLanesSouthIn) * width;
+    maxCars = static_cast<int>(totalInLaneCells * density);
 
     // Number of cells per direction (northHeight will go to the southOut end of the junction)
     int northHeight = centerY + numLanesWestIn;
@@ -238,9 +238,32 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
             }
             if (cells[y][x].isSpawnPoint()) {
                 double willTurnProbability = calculateWillTurnProbability(x, y);
+                Direction dir = getInitialDirection(x, y);
+                    double prob;
+                    // Get per-lane spawnProbabilities
+                    switch(dir) {
+                        // Coming from the south
+                        case Direction::UP:
+                            prob = southSpawnProb / numLanesSouthIn;
+                            break;
+                        // Coming from the east
+                        case Direction::LEFT:
+                            prob = eastSpawnProb / numLanesEastIn;
+                            break;
+                        // Coming from the north
+                        case Direction::DOWN:
+                            prob = northSpawnProb / numLanesNorthIn;
+                            break;
+                        // Coming from the west
+                        case Direction::RIGHT:
+                            prob = westSpawnProb / numLanesWestIn;
+                            break;
+                        default:
+                            prob = 0.0;
+                    }
                 double r = rand() / double(RAND_MAX);
-                if (currentCars < maxCars && r <= spawnProb) {
-                    next[y][x].spawnCar(vmax, willTurnProbability, nextCarId++, getInitialDirection(x, y));
+                if (currentCars < maxCars && r <= prob) {
+                    next[y][x].spawnCar(vmax, willTurnProbability, nextCarId++, dir);
                     currentCars++;
                 }
                 next[y][x].setSpawnPoint(true);

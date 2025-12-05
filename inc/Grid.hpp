@@ -149,13 +149,16 @@ private:
     int numLanesSouth = numLanesSouthIn + numLanesSouthOut;
     int numLanesEast = numLanesEastIn + numLanesEastOut;
 
-    int totalLaneCells;   ///< Total number of cells that are part of lanes
+    int totalInLaneCells;   ///< Total number of cells that are part of lanes
     int maxCars;          ///< Maximum number of cars in the simulation
     int currentCars = 0;  ///< Current number of cars in the simulation
 
     int distFromTrafficLight = 10; ///< Distance from traffic light to turn block for right lane turns
 
-    double spawnProb = 0.2; ///< Probability of spawning a car at spawn point per update
+    double northSpawnProb = 0.681;    ///< Probability  of spawning a car in the north
+    double westSpawnProb = 0.2;       ///< Probability  of spawning a car in the west
+    double southSpawnProb = 0.2;      ///< Probability  of spawning a car in the south
+    double eastSpawnProb = 0.2;       ///< Probability  of spawning a car in the east
 
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 
