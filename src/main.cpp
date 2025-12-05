@@ -6,6 +6,7 @@
 #include "Rules.hpp"
 #include "ArgParser.hpp"
 #include "Utils.hpp"
+#include "Logger.hpp"
 #include <filesystem>
 #include <sstream>
 #include <iomanip>
@@ -27,6 +28,7 @@ int main(int argc, char* argv[]) {
     grid.setupCrossroadLights(25, 0, 20);
     
     NSRules rules;
+    Logger logger;
     
     std::cout << "Step, AvgVelocity" << std::endl;
     
@@ -40,6 +42,10 @@ int main(int argc, char* argv[]) {
             std::ostringstream ss;
             ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
             Utils::exportPPM(grid, ss.str(), 10, parser.getVMax()); 
+        }
+
+        if (parser.isPlotEnabled()) {
+            // Log important data for plotting
         }
 
     }

@@ -109,6 +109,7 @@ public:
      * @param distFromTrafficLight Distance from the traffic light to the turn block
      */
     void createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight);
+
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid
