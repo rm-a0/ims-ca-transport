@@ -271,7 +271,12 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
             else if (dir == Direction::LEFT) { dx = -1; dy = 0; }
             else if (dir == Direction::UP) { dx = 0; dy = -1; }
             else if (dir == Direction::DOWN) { dx = 0; dy = 1; }
-       
+            
+            // Update for logging and plotting pourposes
+            cells[y][x].updateTotalVelocity();
+            cells[y][x].updateCarWaitingTime();
+
+
             int currentVel = cells[y][x].getCarVelocity();
             int dist = distanceToNextCar(x, y);
            
@@ -291,6 +296,9 @@ void Grid::update(const Rules& rules, double density, int vmax, double p) {
 
             // Check if the car is leaving the grid (if so then remove it)
             if (newX >= width || newX < 0 || newY >= height || newY < 0) {
+                int wait = cells[y][x].getCarWaitingTime();
+                finishedCarsWaitingTimes.push_back(wait);
+
                 cells[y][x].removeCar();
                 currentCars--;
                 continue;

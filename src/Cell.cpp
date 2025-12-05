@@ -93,5 +93,16 @@ void Cell::spawnCar(int vmax, double willTurnProb, int id, Direction dir) {
     double r = rand() / double(RAND_MAX);
     if (r <= willTurnProb)
         willTurn = true;
-    car = Car{id, velocity, dir, willTurn};
+    car = Car{id, velocity, 0, dir, willTurn};
+}
+
+void Cell::updateCarWaitingTime() {
+    if (!hasCar()) return;
+    if (getCarVelocity() == 0)
+        car->waitingTime++;
+}
+
+void Cell::updateTotalVelocity() {
+    if (!hasCar()) return;
+    totalVelocity += getCarVelocity();
 }

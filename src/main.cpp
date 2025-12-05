@@ -41,7 +41,12 @@ int main(int argc, char* argv[]) {
             ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
             Utils::exportPPM(grid, ss.str(), 10, parser.getVMax()); 
         }
+
     }
-    
+
+    if (parser.isPlotEnabled()) {
+        Utils::exportCSV(grid, parser.getPlotDir(), parser.getSteps());
+    }
+        
     return 0;
 }

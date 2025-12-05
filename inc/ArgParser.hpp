@@ -35,7 +35,9 @@ public:
      * @brief Getters
      */
     bool isVizEnabled() const { return vizFlag; }
+    bool isPlotEnabled() const { return plotFlag; }
     std::string getVizDir() const { return vizDir; }
+    std::string getPlotDir() const { return plotDir; }
     int getSteps() const { return steps; }
     int getWidth() const { return width; }
     int getHeight() const { return height; }
@@ -45,17 +47,19 @@ public:
     bool getOptimize() const { return optimize; }
 
 private:
-    size_t argc;                ///< Argument count
-    char** argv;                ///< Arguments
-    bool vizFlag = false;       ///< Flag for visualization
-    std::string vizDir = "viz"; ///< Directory where PPM output is saved
-    int steps = 100;            ///< Number of steps
-    int width = 100;            ///< Grid width (road length)
-    int height = 100;           ///< Grid height (lanes)
-    int vmax = 3;               ///< Max velocity
-    double prob = 0.3;          ///< Braking probability
-    double density = 0.2;       ///< Initial car density (0-1)
-    bool optimize = false;      ///< Add straight lane to east inbound and west outbound if true
+    size_t argc;                    ///< Argument count
+    char** argv;                    ///< Arguments
+    bool vizFlag = false;           ///< Flag for visualization
+    bool plotFlag = false;          ///< Flag for plotting 
+    std::string vizDir = "viz";     ///< Directory where PPM output is saved
+    std::string plotDir = "data";   ///< Directory where plot data is saved
+    int steps = 100;                ///< Number of steps
+    int width = 100;                ///< Grid width (road length)
+    int height = 100;               ///< Grid height (lanes)
+    int vmax = 3;                   ///< Max velocity
+    double prob = 0.3;              ///< Braking probability
+    double density = 0.2;           ///< Initial car density (0-1)
+    bool optimize = false;          ///< Add straight lane to east inbound and west outbound if true
 };
 
 #endif // ARG_PARSER_HPP

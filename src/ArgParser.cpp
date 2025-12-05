@@ -48,6 +48,11 @@ bool ArgParser::parse() {
             if (i + 1 < argc && argv[i + 1][0] != '-')
                 vizDir = argv[++i];
         }
+        else if (arg == "-p" || arg == "--plot") {
+            plotFlag = true;
+            if (i + 1 < argc && argv[i + 1][0] != '-')
+                plotDir = argv[++i];
+        }
         else if (arg == "-s" || arg == "--steps") {
             if (i + 1 >= argc || argv[i + 1][0] == '-') 
                 return returnWithError("Missing number for --steps.");
@@ -106,6 +111,8 @@ void ArgParser::displayHelp() {
         << "Options:\n"
         << "  -v, --viz [dir]           Enable PPM visualization.\n"
         << "                            dir = output directory (optional)\n"
+        << "  -p, --plot [dir]          Enable plot data extraction\n"
+        << "                            dir = output directory"
         << "  -s, --steps <n>           Number of CA steps/updates.\n"
         << "  -W, --width <n>           Road length (CA grid width).\n"
         << "  -H, --height <n>          Number of lanes (CA grid height, default 1).\n"
