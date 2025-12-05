@@ -39,25 +39,18 @@ public:
      */
     int distanceToNextCar(int x, int y) const;
     /**
-     * @brief Export grid into a PPM file (colors by velocity)
-     * @param filename Name of the file
-     * @param scale Pixel scale factor
-     */
-    void exportPPM(const std::string& filename, int scale, int vmax) const;
-    void exportSmoothPPM(const std::string& filename, int scale, int vmax, const Grid& nextGrid, float t) const;
-    /**
      * @brief Computes average velocity of all cars
      * @return Avg velocity (or 0 if no cars)
      */
     double averageVelocity() const;
     /**
-     * @brief Gets cell at (x, y)
-     * @param x X coordinate
+     * @brief Gets cell at (y, x)
      * @param y Y coordinate
+     * @param x X coordinate
      * @return Cell at set coordinate
      */
-    Cell& getCell(int x, int y) { return cells[y][x]; }
-    const Cell& getCell(int x, int y) const { return cells[y][x]; }
+    Cell& getCell(int y, int x) { return cells[y][x]; }
+    const Cell& getCell(int y, int x) const { return cells[y][x]; }
     
     /**
      * @brief Gets the width of the grid
@@ -112,7 +105,6 @@ public:
      * @param distFromTrafficLight Distance from the traffic light to the turn block
      */
     void createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight);
-    
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid

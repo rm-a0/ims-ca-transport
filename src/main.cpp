@@ -5,6 +5,7 @@
 #include "Grid.hpp"
 #include "Rules.hpp"
 #include "ArgParser.hpp"
+#include "Utils.hpp"
 #include <filesystem>
 #include <sstream>
 #include <iomanip>
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
         if (parser.isVizEnabled()) {
             std::ostringstream ss;
             ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
-            grid.exportPPM(ss.str(), 10, parser.getVMax());
+            Utils::exportPPM(grid, ss.str(), 10, parser.getVMax()); 
         }
     }
     

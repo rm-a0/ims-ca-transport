@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 #include <cmath>
 #include <algorithm>
+#include <map>
 
 /*
  * Turbo colormap
@@ -92,5 +93,143 @@ std::array<unsigned char, 3> Utils::velocityColormap(int velocity, int vmax, Col
             return {0, 0, 0};
         default:
             return {0, 0, 0};
+    }
+}
+
+void Utils::exportPPM(const Grid& grid, const std::string& filename, int scale, int vmax) {
+    int width = grid.getWidth();
+    int height = grid.getHeight();
+
+    std::ofstream file(filename, std::ios::binary);
+    if (!file) return;
+
+    file << "P6\n" << width * scale << " " << height * scale << "\n255\n";
+
+    for (int py = 0; py < height * scale; py++) {
+        for (int px = 0; px < width * scale; px++) {
+            int cellX = px / scale;
+            int cellY = py / scale;
+
+            unsigned char r, g, b;
+
+            const Cell& c = grid.getCell(cellY, cellX);
+
+            if (c.hasTrafficLight()) {
+                switch (c.getTrafficLightState()) {
+                    case TrafficLight::RED:    r=255; g=0;   b=0;   break;
+                    case TrafficLight::YELLOW: r=255; g=255; b=0;   break;
+                    case TrafficLight::GREEN:  r=0;   g=255; b=0;   break;
+                }
+            }
+            else if (c.hasCar()) {
+                int vel = c.getCarVelocity();
+                auto [rr, gg, bb] = Utils::velocityColormap(vel, vmax, Colormap::Turbo);
+                r = rr; g = gg; b = bb;
+            }
+            else if (c.hasTurn()) {
+                r = 255; g = 255; b = 255;
+            }
+            else if (c.isSpawnPoint()) {
+                r = 0; g = 0; b = 255;
+            }
+            else if (c.isAlive()) {
+                r = 0; g = 0; b = 0;
+            }
+            else {
+                r = 50; g = 50; b = 50;
+            }
+
+            file.put(r); file.put(g); file.put(b);
+        }
+    }
+}
+
+void Utils::exportSmoothPPM(const Grid& grid,
+                     const Grid& nextGrid,
+                     const std::string& filename,
+                     int scale,
+                     int vmax,
+                     float t) {
+
+    int width = grid.getWidth();
+    int height = grid.getHeight();
+
+    std::ofstream file(filename, std::ios::binary);
+    if (!file) return;
+
+    file << "P6\n" << width * scale << " " << height * scale << "\n255\n";
+
+    // Interpolated lookup grid
+    std::vector<std::vector<int>> carAt(height, std::vector<int>(width, -1));
+    std::vector<std::vector<int>> velAt(height, std::vector<int>(width, 0));
+
+    std::map<int, std::pair<int,int>> posNow, posNext;
+    std::map<int, int> velMap;
+
+    // Map current cars
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            const Cell& c = grid.getCell(y, x);
+            if (c.hasCar()) {
+                posNow[c.getCarId()] = {x, y};
+                velMap[c.getCarId()] = c.getCarVelocity();
+            }
+            if (nextGrid.getCell(y, x).hasCar()) {
+                posNext[nextGrid.getCell(y, x).getCarId()] = {x, y};
+            }
+        }
+    }
+
+    // Interpolate each car
+    for (auto& [id, p1] : posNow) {
+        if (posNext.find(id) == posNext.end()) continue;
+
+        int x1 = p1.first,  y1 = p1.second;
+        int x2 = posNext[id].first, y2 = posNext[id].second;
+
+        // Wrapping fix
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+
+        if (abs(dx) > width / 2)  x2 += (dx > 0 ? -width : width);
+        if (abs(dy) > height / 2) y2 += (dy > 0 ? -height : height);
+
+        float ix = x1 + t * (x2 - x1);
+        float iy = y1 + t * (y2 - y1);
+
+        int fx = ((int)round(ix) % width + width) % width;
+        int fy = ((int)round(iy) % height + height) % height;
+
+        carAt[fy][fx] = id;
+        velAt[fy][fx] = velMap[id];
+    }
+
+    // Render
+    for (int py = 0; py < height * scale; py++) {
+        for (int px = 0; px < width * scale; px++) {
+            int cx = px / scale;
+            int cy = py / scale;
+
+            unsigned char r, g, b;
+            const Cell& c = grid.getCell(cy, cx);
+
+            if (c.hasTrafficLight()) {
+                switch (c.getTrafficLightState()) {
+                    case TrafficLight::RED:    r=255; g=0;   b=0;   break;
+                    case TrafficLight::YELLOW: r=255; g=255; b=0;   break;
+                    case TrafficLight::GREEN:  r=0;   g=255; b=0;   break;
+                }
+            }
+            else if (carAt[cy][cx] != -1) {
+                int vel = velAt[cy][cx];
+                auto [rr, gg, bb] = Utils::velocityColormap(vel, vmax, Colormap::Turbo);
+                r = rr; g = gg; b = bb;
+            }
+            else {
+                r = 50; g = 50; b = 50;
+            }
+
+            file.put(r); file.put(g); file.put(b);
+        }
     }
 }
