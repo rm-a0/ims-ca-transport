@@ -3,7 +3,6 @@
 Traffic Simulation Data Analysis and Visualization
 Authors: Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
 """
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -24,9 +23,9 @@ SPATIAL_FILE = "spatial_heatmap.csv"
 TRAJECTORY_FILE = "vehicle_trajectories.csv"
 
 # Color palette
-cmap = mpl.cm.get_cmap("viridis")
-COLOR_BASE = cmap(0.3)
-COLOR_MOD  = cmap(0.9)
+CMAP = mpl.colormaps["viridis"]
+COLOR_BASE = CMAP(0.2)
+COLOR_MOD  = CMAP(0.8)
 
 # Plot styling
 plt.style.use('seaborn-v0_8-darkgrid')
@@ -177,7 +176,7 @@ def plot_spatial_heatmap(data_dir, output_dir, scenario_name):
 
     fig, ax = plt.subplots(figsize=(12, 10))
     sns.heatmap(
-        pivot, cmap='viridis', center=1.5, vmin=0, vmax=3,
+        pivot, cmap=CMAP, center=1.5, vmin=0, vmax=3,
         cbar_kws={'label': 'Average Velocity (cells/step)'}, ax=ax, square=True
     )
 
