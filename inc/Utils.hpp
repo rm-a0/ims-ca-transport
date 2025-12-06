@@ -32,8 +32,6 @@ namespace Utils
                          int scale,
                          int vmax,
                          float t);
-
-    void exportCSV(const Grid& grid, const std::string& dir, int steps);
 }
 
 #endif // UTILS_HPP

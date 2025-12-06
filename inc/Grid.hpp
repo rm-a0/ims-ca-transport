@@ -6,12 +6,16 @@
 #define GRID_HPP
 #include "Cell.hpp"
 #include "Rules.hpp"
+#include "Logger.hpp"
 #include <vector>
 #include <fstream>
 #include <string>
 
 #include <vector>
 #include <tuple>
+
+class Logger;
+struct TimestepMetrics;
 
 /**
  * @class Grid
@@ -33,8 +37,9 @@ public:
      * @param rules Rules to be applied
      * @param vmax Max velocity
      * @param p Braking probability
+     * @param step Currect step number
      */
-    void update(const Rules& rules, double density, int vmax, double p);
+    void update(const Rules& rules, double density, int vmax, double p, int step);
     /**
      * @brief Finds distance to next car ahead (toroidal)
      * @param x X coordinate
@@ -110,6 +115,34 @@ public:
      */
     void createRightTurnLanes(int x, int y, Direction fromDir, int distFromTrafficLight);
 
+    // LOGGER 
+
+    /**
+     * @brief Set logger for data collection
+     * @param l Pointer to logger instance
+     */
+    void setLogger(Logger* l) { logger = l; }
+    
+    /**
+     * @brief Collect metrics for current timestep
+     * @param currentStep Current simulation step
+     * @return TimestepMetrics structure
+     */
+    TimestepMetrics collectTimestepMetrics(int currentStep);
+    
+    /**
+     * @brief Calculate maximum queue length for given direction
+     * @param dir Direction to analyze
+     * @return Maximum consecutive stopped vehicles
+     */
+    int calculateMaxQueue(Direction dir);
+    
+    /**
+     * @brief Log direction-specific metrics
+     * @param currentStep Current simulation step
+     */
+    void logDirectionMetrics(int currentStep);
+
 private:
     int width;                              ///< Width of the grid
     int height;                             ///< Height of the grid
@@ -163,6 +196,8 @@ private:
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 
     bool normalize = false; ///< If --optimize is set then this becomes 1 to shift all affected areas
+
+    Logger* logger = nullptr;  ///< Pointer to logger for data collection
 };
 
 #endif // GRID_HPP

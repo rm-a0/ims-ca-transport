@@ -129,10 +129,12 @@ void Utils::exportPPM(const Grid& grid, const std::string& filename, int scale, 
                 r = rr; g = gg; b = bb;
             }
             else if (c.hasTurn()) {
-                r = 255; g = 255; b = 255;
+                // r = 255; g = 255; b = 255;
+                r = 50; g = 50; b = 50;
             }
             else if (c.isSpawnPoint()) {
                 r = 0; g = 0; b = 255;
+                r = 50; g = 50; b = 50;
             }
             else if (c.isAlive()) {
                 r = 0; g = 0; b = 0;
@@ -234,10 +236,4 @@ void Utils::exportSmoothPPM(const Grid& grid,
             file.put(r); file.put(g); file.put(b);
         }
     }
-}
-
-void Utils::exportCSV(const Grid& grid, const std::string& dir, int steps) {
-    std::filesystem::create_directories(dir);
-
-    std::ofstream file(dir + "/car_waiting_times.csv");
 }
