@@ -56,19 +56,31 @@ void TrafficLight::update() {
     switch (state) {
         case RED:
             if (timer >= redDuration) {
-                state = GREEN;
+                if (greenDuration > 0) {
+                    state = GREEN;
+                }
                 timer = 0;
             }
             break;
         case GREEN:
             if (timer >= greenDuration) {
-                state = YELLOW;
+                if (yellowDuration > 0) {
+                    state = YELLOW;
+                }
+                else if (redDuration > 0) {
+                    state = RED;
+                }
                 timer = 0;
             }
             break;
         case YELLOW:
             if (timer >= yellowDuration) {
-                state = RED;
+                if (redDuration > 0) {
+                    state = RED;
+                }
+                else {
+                    state = GREEN;
+                }
                 timer = 0;
             }
             break;

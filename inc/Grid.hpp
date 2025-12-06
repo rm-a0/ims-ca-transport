@@ -116,17 +116,17 @@ private:
     std::vector<std::vector<Cell>> cells;   ///< 2D vector containing cells
     int nextCarId = 0;                      ///< ID of the next car
 
-    // Traffic light durations (yellow is calculated from green -> 90% green / 10% yellow)
-    int northInRedDuration = 0;             ///< Red light duration for north inbound
-    int northInGreenDuration = 100;         ///< Green light duration for north inbound
-    int southInRedDuration = 100;           ///< Red light duration for south inbound
-    int southInGreenDuration = 0;           ///< Green light duration for south inbound
-    int westInRedDuration = 100;            ///< Red light duration for west inbound
-    int westInGreenDuration = 0;            ///< Green light duration for west inbound
-    int eastInStraightRedDuration = 100;    ///< Red light duration for east inbound (straight)
-    int eastInStraightGreenDuration = 0;    ///< Green light duration for east inbound (straight)
-    int eastInTurnRedDuration = 100;        ///< Red light duration for east inbound (left turn)
-    int eastInTurnGreenDuration = 0;        ///< Green light duration for east inbound (left turn)
+    // Traffic light durations (yellow is calculated from green -> 90% green / 10% yellow) (red is calculated in setupCrossroadLights)
+    int northInGreenDuration = 100;          ///< Green light duration for north inbound
+    int northInRedDuration = 0;              ///< Red light duration for north inbound
+    int southInGreenDuration = 100;          ///< Green light duration for south inbound
+    int southInRedDuration = 0;              ///< Red light duration for south inbound
+    int westInGreenDuration = 100 - 50;      ///< Green light duration for west inbound (should be eastInStraightGreenDuration - eastInTurnGreenDuration)
+    int westInRedDuration = 0;               ///< Red light duration for west inbound
+    int eastInStraightGreenDuration = 100;   ///< Green light duration for east inbound (straight)
+    int eastInStraightRedDuration = 0;       ///< Red light duration for east inbound (straight)
+    int eastInTurnGreenDuration = 50;        ///< Green light duration for east inbound (left turn)
+    int eastInTurnRedDuration = 0;           ///< Red light duration for east inbound (left turn)
 
     int numLanesNorthIn = 3;  ///< From NORTH to SOUTH (towards junction)
     int numLanesNorthOut = 2; ///< From SOUTH to NORTH (away from junction)
@@ -155,10 +155,10 @@ private:
 
     int distFromTrafficLight = 10; ///< Distance from traffic light to turn block for right lane turns
 
-    double northSpawnProb = 0.681;    ///< Probability  of spawning a car in the north
+    double northSpawnProb = 0.2;    ///< Probability  of spawning a car in the north
     double westSpawnProb = 0.2;       ///< Probability  of spawning a car in the west
     double southSpawnProb = 0.2;      ///< Probability  of spawning a car in the south
-    double eastSpawnProb = 0.2;       ///< Probability  of spawning a car in the east
+    double eastSpawnProb = 0.681;       ///< Probability  of spawning a car in the east
 
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 

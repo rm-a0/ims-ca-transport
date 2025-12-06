@@ -147,17 +147,25 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
     int centerX = width / 2;
     int centerY = height / 2;
 
+    // Initialize red light durations
+    northInRedDuration = eastInStraightGreenDuration + southInGreenDuration;
+    westInRedDuration = northInGreenDuration + southInGreenDuration + eastInTurnGreenDuration;
+    southInRedDuration = eastInStraightGreenDuration + northInGreenDuration;
+    eastInStraightRedDuration = northInGreenDuration + southInGreenDuration;
+    eastInTurnRedDuration = (eastInStraightGreenDuration - eastInTurnGreenDuration) + northInGreenDuration + southInGreenDuration;
+
     // Traffic lights for west inbound
     for (int lane = 0; lane < numLanesWestIn; lane++) {
         int x = centerX - numLanesNorthIn - northLaneSpace;
         int y = centerY + lane;
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
-            tl.state = TrafficLight::GREEN;
-            tl.redDuration = redDur;
-            tl.yellowDuration = yellowDur;
-            tl.greenDuration = greenDur;
-            tl.timer = 0;
+            tl.state = TrafficLight::RED;
+            tl.redDuration = westInRedDuration;
+            tl.yellowDuration = westInGreenDuration * 0.1;
+            tl.greenDuration = westInGreenDuration - tl.yellowDuration;
+            // Green once eastInTurnGreenDuration ends
+            tl.timer = tl.redDuration - eastInTurnGreenDuration;
             cells[y][x].setTrafficLight(tl);
             // Create right turn lane
             if (lane == numLanesWestIn - 1) {
@@ -171,11 +179,22 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         int x = centerX + numLanesSouthIn;
         int y = centerY - numLanesEastIn - eastLaneSpace + lane;
         if (x >= 0 && x < width && y >= 0 && y < height) {
+            // Set traffic light for left turn lane
+            if (lane == numLanesEastIn - 1) {
+                TrafficLight tl;
+                tl.state = TrafficLight::GREEN;
+                tl.redDuration = eastInTurnRedDuration;
+                tl.yellowDuration = eastInTurnGreenDuration * 0.1;
+                tl.greenDuration = eastInTurnGreenDuration - tl.yellowDuration;
+                tl.timer = 0;
+                cells[y][x].setTrafficLight(tl);
+                continue;
+            }
             TrafficLight tl;
             tl.state = TrafficLight::GREEN;
-            tl.redDuration = redDur;
-            tl.yellowDuration = yellowDur;
-            tl.greenDuration = greenDur;
+            tl.redDuration = eastInStraightRedDuration;
+            tl.yellowDuration = eastInStraightGreenDuration * 0.1;
+            tl.greenDuration = eastInStraightGreenDuration - tl.yellowDuration;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
             // Create right turn lane
@@ -192,10 +211,11 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::RED;
-            tl.redDuration = redDur;
-            tl.yellowDuration = yellowDur;
-            tl.greenDuration = greenDur;
-            tl.timer = 0;
+            tl.redDuration = northInRedDuration;
+            tl.yellowDuration = northInGreenDuration * 0.1;
+            tl.greenDuration = northInGreenDuration - tl.yellowDuration;
+            // Green after eastInStraightGreenDuration ends
+            tl.timer = tl.redDuration - eastInStraightGreenDuration;
             cells[y][x].setTrafficLight(tl);
             // Create right turn lane
             if (lane == numLanesNorthIn - 1) {
@@ -211,9 +231,9 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             TrafficLight tl;
             tl.state = TrafficLight::RED;
-            tl.redDuration = redDur;
-            tl.yellowDuration = yellowDur;
-            tl.greenDuration = greenDur;
+            tl.redDuration = southInRedDuration;
+            tl.yellowDuration = southInGreenDuration * 0.1;
+            tl.greenDuration = southInGreenDuration - tl.yellowDuration;
             tl.timer = 0;
             cells[y][x].setTrafficLight(tl);
             // Create right turn lane

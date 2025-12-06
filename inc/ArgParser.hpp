@@ -53,12 +53,12 @@ private:
     bool plotFlag = false;          ///< Flag for plotting 
     std::string vizDir = "viz";     ///< Directory where PPM output is saved
     std::string plotDir = "data";   ///< Directory where plot data is saved
-    int steps = 100;                ///< Number of steps
+    int steps = 1000;               ///< Number of steps
     int width = 100;                ///< Grid width (road length)
     int height = 100;               ///< Grid height (lanes)
     int vmax = 3;                   ///< Max velocity
     double prob = 0.3;              ///< Braking probability
-    double density = 0.2;           ///< Initial car density (0-1)
+    double density = 0.5;           ///< Initial car density (0-1)
     bool optimize = false;          ///< Add straight lane to east inbound and west outbound if true
 };
 
