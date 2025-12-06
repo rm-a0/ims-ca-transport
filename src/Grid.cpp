@@ -410,7 +410,7 @@ void Grid::update(const Rules& rules, double density, int vmax, double p, int st
 }
 
 int Grid::distanceToNextCar(int x, int y) const {
-    if (!cells[y][x].hasCar()) return 0; // Should not happen
+    if (!cells[y][x].hasCar()) return 0;
   
     Direction dir = cells[y][x].getCarDirection();
     int dx = 0, dy = 0;

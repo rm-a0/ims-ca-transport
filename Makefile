@@ -6,7 +6,7 @@ BUILDDIR = build
 VIZDIR = viz
 DATADIR = data
 SCRIPTDIR = scripts
-ZIPNAME = 
+ZIPNAME = 08_xrepcim00_xvesela00.zip
 
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 HDRS = $(wildcard $(INCDIR)/*.hpp)
@@ -51,6 +51,7 @@ cleanplot:
 	rm -rf $(DATADIR)
 
 zip:
+	zip -r $(ZIPNAME) $(SRCDIR) $(INCDIR) $(SCRIPTDIR) README.md Makefile documentation.pdf
 
 
 .PHONY: all run clean

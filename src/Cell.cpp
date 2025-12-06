@@ -2,7 +2,6 @@
  * @file Cell.cpp
  * @authors Michal Repcik (xrepcim00), Adam Vesely (xvesela00)
  */
-
 #include "Cell.hpp"
 #include <cstdlib>
 

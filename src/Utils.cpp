@@ -88,10 +88,8 @@ std::array<unsigned char, 3> Utils::velocityColormap(int velocity, int vmax, Col
                 turbo_srgb_bytes[idx][2]
             };
         case Colormap::Magma:
-            // TODO: implement or include magma table
             return {0, 0, 0};
         case Colormap::Viridis:
-            // TODO: implement or include viridis table
             return {0, 0, 0};
         default:
             return {0, 0, 0};

@@ -92,8 +92,6 @@ class Logger {
 public:
     Logger() = default;
 
-    // === Data Collection Methods ===
-    
     /**
      * @brief Record metrics for current timestep
      */
@@ -124,8 +122,6 @@ public:
      */
     void logDirectionMetrics(const DirectionMetrics& metrics);
 
-    // === Data Export Methods ===
-    
     /**
      * @brief Export timestep metrics to CSV
      * Columns: step, totalCars, carsEntered, carsExited, avgVelocity, 
@@ -166,8 +162,6 @@ public:
      */
     void exportAll(const std::string& directory) const;
 
-    // === Helper Methods ===
-    
     /**
      * @brief Finalize vehicle trajectories (compute averages, etc.)
      * Call this after simulation completes

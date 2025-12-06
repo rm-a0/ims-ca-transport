@@ -352,7 +352,7 @@ void Logger::printSummaryTable() const {
 
     double completionRate = (totalCarsSpawned > 0) ? static_cast<double>(totalCarsExited) / totalCarsSpawned : 0.0;
 
-    // Print nice table
+    // Print table
     std::cout << "\nSimulation Summary Statistics:\n";
     std::cout << std::string(50, '-') << std::endl;
     std::cout << std::left << std::setw(30) << "Metric" << std::setw(20) << "Value" << std::endl;

@@ -55,7 +55,6 @@ public:
     void setSpawnPoint(bool val) { spawnPoint = val; }
     bool isSpawnPoint() const { return spawnPoint; }
     void spawnCar(int vmax, double willTurnProb, int id, Direction dir);
-
     int getEffectiveVelocity() const;
 
     /** Car setters/getters */
@@ -85,6 +84,7 @@ public:
     TrafficLight::State getTrafficLightState() const { return tl ? tl->state : TrafficLight::GREEN; }
     void updateTrafficLight();
 
+    /** Cell setters/getters */
     const long getTotalVelocity() const { return totalVelocity; }
     void updateTotalVelocity();
 
