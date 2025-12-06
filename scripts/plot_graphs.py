@@ -22,6 +22,10 @@ TIMESTEP_FILE = "timestep_metrics.csv"
 SPATIAL_FILE = "spatial_heatmap.csv"
 TRAJECTORY_FILE = "vehicle_trajectories.csv"
 
+# Lane configuration for queue normalization
+BASELINE_EAST_LANES = 3
+MODIFIED_EAST_LANES = 4
+
 # Color palette
 CMAP = mpl.colormaps["viridis"]
 COLOR_BASE = CMAP(0.2)
@@ -45,7 +49,7 @@ def plot_throughput_comparison(baseline_dir, modified_dir, output_dir):
     ].values[0]
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    scenarios = ['Baseline\n(1 lane)', 'Modified\n(2 lanes)']
+    scenarios = ['Baseline\n(3 lanes East)', 'Modified\n(4 lanes East)']
     throughputs = [baseline_throughput, modified_throughput]
     colors = [COLOR_BASE, COLOR_MOD]
 
@@ -80,9 +84,13 @@ def plot_queue_comparison(baseline_dir, modified_dir, output_dir):
         modified_summary['metric'] == 'maxQueueLength', 'value'
     ].values[0]
 
+    # Normalize by number of lanes
+    baseline_queue_normalized = baseline_queue / BASELINE_EAST_LANES
+    modified_queue_normalized = modified_queue / MODIFIED_EAST_LANES
+
     fig, ax = plt.subplots(figsize=(10, 6))
-    scenarios = ['Baseline\n(1 lane)', 'Modified\n(2 lanes)']
-    queues = [baseline_queue, modified_queue]
+    scenarios = ['Baseline\n(3 lanes East)', 'Modified\n(4 lanes East)']
+    queues = [baseline_queue_normalized, modified_queue_normalized]
     colors = [COLOR_BASE, COLOR_MOD]
 
     bars = ax.bar(scenarios, queues, color=colors, edgecolor='black', linewidth=1.5)
@@ -90,15 +98,15 @@ def plot_queue_comparison(baseline_dir, modified_dir, output_dir):
     for bar in bars:
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width() / 2, height,
-                f'{int(height)}', ha='center', va='bottom', fontsize=12)
+                f'{height:.2f}', ha='center', va='bottom', fontsize=12)
 
-    reduction = ((baseline_queue - modified_queue) / baseline_queue) * 100
+    reduction = ((baseline_queue_normalized - modified_queue_normalized) / baseline_queue_normalized) * 100
     ax.text(0.5, max(queues) * 0.9, f'-{reduction:.1f}% reduction',
             ha='center', fontsize=14,
             bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.5))
 
-    ax.set_ylabel('Maximum Queue Length (vehicles)')
-    ax.set_title('Maximum Queue Length on Eastbound Approach')
+    ax.set_ylabel('Average Queue Length per Lane (vehicles)')
+    ax.set_title('Normalized Queue Length on Eastbound Approach')
 
     plt.tight_layout()
     plt.savefig(f"{output_dir}/queue_comparison.png", dpi=300)
@@ -112,9 +120,9 @@ def plot_velocity_timeseries(baseline_dir, modified_dir, output_dir):
     fig, ax = plt.subplots(figsize=(14, 6))
 
     ax.plot(baseline_ts['step'], baseline_ts['avgVelocity'],
-            label='Baseline (1 lane)', color=COLOR_BASE, linewidth=1.5)
+            label='Baseline (3 lanes East)', color=COLOR_BASE, linewidth=1.5)
     ax.plot(modified_ts['step'], modified_ts['avgVelocity'],
-            label='Modified (2 lanes)', color=COLOR_MOD, linewidth=1.5)
+            label='Modified (4 lanes East)', color=COLOR_MOD, linewidth=1.5)
 
     ax.set_xlabel('Time (seconds)')
     ax.set_ylabel('Average Velocity (cells/step)')
@@ -149,9 +157,9 @@ def plot_direction_speeds(baseline_dir, modified_dir, output_dir):
 
     fig, ax = plt.subplots(figsize=(12, 6))
     bars1 = ax.bar(x - width / 2, baseline_speeds, width,
-                   label='Baseline (1 lane)', color=COLOR_BASE, edgecolor='black')
+                   label='Baseline (3 lanes East)', color=COLOR_BASE, edgecolor='black')
     bars2 = ax.bar(x + width / 2, modified_speeds, width,
-                   label='Modified (2 lanes)', color=COLOR_MOD, edgecolor='black')
+                   label='Modified (4 lanes East)', color=COLOR_MOD, edgecolor='black')
 
     ax.set_ylabel('Average Speed (cells/step)')
     ax.set_title('Average Speed by Direction')
@@ -246,14 +254,16 @@ def generate_summary_report(baseline_dir, modified_dir, output_dir):
         f.write(f"   Increase:  {inc_t:.1f}%\n")
         f.write("   Result:    " + ("CONFIRMED" if inc_t >= H1_THROUGHPUT_REQUIRED_INCREASE else "REJECTED") + "\n\n")
 
-        # H2 queue
+        # H2 queue (normalized)
         base_q = baseline_summary.loc[baseline_summary['metric'] == 'maxQueueLength', 'value'].values[0]
         mod_q = modified_summary.loc[modified_summary['metric'] == 'maxQueueLength', 'value'].values[0]
-        red_q = ((base_q - mod_q) / base_q) * 100
+        base_q_norm = base_q / BASELINE_EAST_LANES
+        mod_q_norm = mod_q / MODIFIED_EAST_LANES
+        red_q = ((base_q_norm - mod_q_norm) / base_q_norm) * 100
 
-        f.write(f"H2: Maximum queue length decreases by at least {H2_QUEUE_REQUIRED_REDUCTION:.1f}%\n")
-        f.write(f"   Baseline:  {int(base_q)} vehicles\n")
-        f.write(f"   Modified:  {int(mod_q)} vehicles\n")
+        f.write(f"H2: Normalized queue length decreases by at least {H2_QUEUE_REQUIRED_REDUCTION:.1f}%\n")
+        f.write(f"   Baseline:  {base_q_norm:.2f} vehicles/lane\n")
+        f.write(f"   Modified:  {mod_q_norm:.2f} vehicles/lane\n")
         f.write(f"   Reduction: {red_q:.1f}%\n")
         f.write("   Result:    " + ("CONFIRMED" if red_q >= H2_QUEUE_REQUIRED_REDUCTION else "REJECTED") + "\n\n")
 

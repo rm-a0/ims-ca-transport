@@ -191,7 +191,7 @@ private:
     double northSpawnProb = 0.2;    ///< Probability  of spawning a car in the north
     double westSpawnProb = 0.2;       ///< Probability  of spawning a car in the west
     double southSpawnProb = 0.2;      ///< Probability  of spawning a car in the south
-    double eastSpawnProb = 0.681;       ///< Probability  of spawning a car in the east
+    double eastSpawnProb = 0.645;       ///< Probability  of spawning a car in the east
 
     double willTurnProb = 0.4; ///< Probability that a car will turn at the next turn block
 

@@ -43,8 +43,8 @@ cleanviz:
 	rm -rf $(VIZDIR) output.gif output.mp4
 
 runplot:
-	./$(TARGET) -p
-	./$(TARGET) -p -O
+	./$(TARGET) -p -s 3600
+	./$(TARGET) -p -o -s 3600
 	./$(SCRIPTDIR)/plot_graphs.py $(DATADIR)/baseline $(DATADIR)/modified $(DATADIR)/graphs
 
 cleanplot:
