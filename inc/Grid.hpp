@@ -117,15 +117,15 @@ private:
     int nextCarId = 0;                      ///< ID of the next car
 
     // Traffic light durations (yellow is calculated from green -> 90% green / 10% yellow) (red is calculated in setupCrossroadLights)
-    int northInGreenDuration = 100;          ///< Green light duration for north inbound
+    int northInGreenDuration = 80;           ///< Green light duration for north inbound
     int northInRedDuration = 0;              ///< Red light duration for north inbound
-    int southInGreenDuration = 100;          ///< Green light duration for south inbound
+    int southInGreenDuration = 80;           ///< Green light duration for south inbound
     int southInRedDuration = 0;              ///< Red light duration for south inbound
-    int westInGreenDuration = 100 - 50;      ///< Green light duration for west inbound (should be eastInStraightGreenDuration - eastInTurnGreenDuration)
+    int westInGreenDuration = 80;            ///< Green light duration for west inbound (should be eastInStraightGreenDuration - eastInTurnGreenDuration)
     int westInRedDuration = 0;               ///< Red light duration for west inbound
-    int eastInStraightGreenDuration = 100;   ///< Green light duration for east inbound (straight)
+    int eastInStraightGreenDuration = 120;   ///< Green light duration for east inbound (straight)
     int eastInStraightRedDuration = 0;       ///< Red light duration for east inbound (straight)
-    int eastInTurnGreenDuration = 50;        ///< Green light duration for east inbound (left turn)
+    int eastInTurnGreenDuration = 60;        ///< Green light duration for east inbound (left turn)
     int eastInTurnRedDuration = 0;           ///< Red light duration for east inbound (left turn)
 
     int numLanesNorthIn = 3;  ///< From NORTH to SOUTH (towards junction)

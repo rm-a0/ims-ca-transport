@@ -147,12 +147,25 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
     int centerX = width / 2;
     int centerY = height / 2;
 
+    int eastInStraightOnlyGreenDuration = eastInStraightGreenDuration - eastInTurnGreenDuration;
     // Initialize red light durations
-    northInRedDuration = eastInStraightGreenDuration + southInGreenDuration;
+    northInRedDuration = southInGreenDuration + eastInStraightGreenDuration +
+                        (westInGreenDuration > eastInStraightOnlyGreenDuration
+                            ? (westInGreenDuration - eastInStraightOnlyGreenDuration)
+                            : 0);
     westInRedDuration = northInGreenDuration + southInGreenDuration + eastInTurnGreenDuration;
-    southInRedDuration = eastInStraightGreenDuration + northInGreenDuration;
-    eastInStraightRedDuration = northInGreenDuration + southInGreenDuration;
-    eastInTurnRedDuration = (eastInStraightGreenDuration - eastInTurnGreenDuration) + northInGreenDuration + southInGreenDuration;
+    southInRedDuration = eastInStraightGreenDuration + northInGreenDuration +
+                        (westInGreenDuration > eastInStraightOnlyGreenDuration
+                            ? (westInGreenDuration - eastInStraightOnlyGreenDuration)
+                            : 0);
+    eastInStraightRedDuration = northInGreenDuration + southInGreenDuration +
+                                (westInGreenDuration > eastInStraightOnlyGreenDuration
+                                    ? (westInGreenDuration - eastInStraightOnlyGreenDuration)
+                                    : 0);
+    eastInTurnRedDuration = eastInStraightOnlyGreenDuration + northInGreenDuration + southInGreenDuration +
+                            (westInGreenDuration > eastInStraightOnlyGreenDuration
+                                ? (westInGreenDuration - eastInStraightOnlyGreenDuration)
+                                : 0);
 
     // Traffic lights for west inbound
     for (int lane = 0; lane < numLanesWestIn; lane++) {
@@ -214,8 +227,11 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
             tl.redDuration = northInRedDuration;
             tl.yellowDuration = northInGreenDuration * 0.1;
             tl.greenDuration = northInGreenDuration - tl.yellowDuration;
-            // Green after eastInStraightGreenDuration ends
-            tl.timer = tl.redDuration - eastInStraightGreenDuration;
+            // Green after eastInStraightGreenDuration or westInGreenDuration ends
+            tl.timer = tl.redDuration - eastInStraightGreenDuration -
+                        (westInGreenDuration > eastInStraightOnlyGreenDuration
+                            ? (westInGreenDuration - eastInStraightOnlyGreenDuration)
+                            : 0);
             cells[y][x].setTrafficLight(tl);
             // Create right turn lane
             if (lane == numLanesNorthIn - 1) {
