@@ -130,11 +130,11 @@ void Utils::exportPPM(const Grid& grid, const std::string& filename, int scale, 
             }
             else if (c.hasTurn()) {
                 // r = 255; g = 255; b = 255;
-                r = 50; g = 50; b = 50;
+                r = 0; g = 0; b = 0;
             }
             else if (c.isSpawnPoint()) {
-                r = 0; g = 0; b = 255;
-                r = 50; g = 50; b = 50;
+                // r = 0; g = 0; b = 255;
+                r = 0; g = 0; b = 0;
             }
             else if (c.isAlive()) {
                 r = 0; g = 0; b = 0;

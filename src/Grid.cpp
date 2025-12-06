@@ -261,129 +261,152 @@ void Grid::setupCrossroadLights(int redDur, int yellowDur, int greenDur) {
 }
 
 void Grid::update(const Rules& rules, double density, int vmax, double p, int step) {
-std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell()));
-// Copy traffic lights and turns to next state
-for (int y = 0; y < height; y++) {
-for (int x = 0; x < width; x++) {
-if (cells[y][x].hasTrafficLight()) {
-cells[y][x].updateTrafficLight();
-next[y][x].setTrafficLight(*cells[y][x].getTrafficLight());
-}
-if (cells[y][x].hasTurn()) {
-next[y][x].setTurn(*cells[y][x].getTurn());
-}
-if (cells[y][x].isSpawnPoint()) {
-double willTurnProbability = calculateWillTurnProbability(x, y);
-Direction dir = getInitialDirection(x, y);
-double prob;
-// Get per-lane spawnProbabilities
-switch(dir) {
-// Coming from the south
-case Direction::UP:
-prob = southSpawnProb / numLanesSouthIn;
-break;
-// Coming from the east
-case Direction::LEFT:
-prob = eastSpawnProb / numLanesEastIn;
-break;
-// Coming from the north
-case Direction::DOWN:
-prob = northSpawnProb / numLanesNorthIn;
-break;
-// Coming from the west
-case Direction::RIGHT:
-prob = westSpawnProb / numLanesWestIn;
-break;
-default:
-prob = 0.0;
-}
-double r = rand() / double(RAND_MAX);
-if (currentCars < maxCars && r <= prob) {
-next[y][x].spawnCar(vmax, willTurnProbability, nextCarId++, dir);
-if (logger) {
-bool willTurn = next[y][x].getCarWillTurn(); // Get the actual willTurn after spawning
-logger->logVehicleSpawn(nextCarId, step, dir, willTurn);
-}
-currentCars++;
-}
-next[y][x].setSpawnPoint(true);
-}
-if (cells[y][x].isAlive()) {
-next[y][x].setAlive(true);
-}
-}
-}
-// First pass: Calculate desired positions and velocities for all cars
-struct CarMove {
-int oldX, oldY;
-int newX, newY;
-int newVel;
-int carId;
-Direction dir;
-bool willTurn;
-};
-std::vector<CarMove> moves;
-for (int y = 0; y < height; y++) {
-for (int x = 0; x < width; x++) {
-if (!cells[y][x].hasCar()) continue;
-Direction dir = cells[y][x].getCarDirection();
-int dx = 0, dy = 0;
-if (dir == Direction::RIGHT) { dx = 1; dy = 0; }
-else if (dir == Direction::LEFT) { dx = -1; dy = 0; }
-else if (dir == Direction::UP) { dx = 0; dy = -1; }
-else if (dir == Direction::DOWN) { dx = 0; dy = 1; }
-// Update for logging and plotting pourposes
-cells[y][x].updateTotalVelocity();
-int currentVel = cells[y][x].getCarVelocity();
-int dist = distanceToNextCar(x, y);
-// Apply Nagel-Schreckenberg rules
-int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
-// Calculate new position with wrapping
-int newX = x;
-int newY = y;
-if (dx != 0) {
-newX = x + newVel * dx;
-}
-if (dy != 0) {
-newY = y + newVel * dy;
-}
-// Check if the car is leaving the grid (if so then remove it)
-if (newX >= width || newX < 0 || newY >= height || newY < 0) {
-int carId = cells[y][x].getCarId();
-cells[y][x].removeCar();
-currentCars--;
-if (logger) {
-logger->logVehicleExit(carId, step);
-}
-continue;
-}
-moves.push_back({x, y, newX, newY, newVel, cells[y][x].getCarId(), dir, cells[y][x].getCarWillTurn()});
-}
-}
-// Second pass: Apply moves, checking for conflicts
-for (const auto& move : moves) {
-bool turn = cells[move.oldY][move.oldX].getCarWillTurn();
-cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
-if (next[move.newY][move.newX].hasTurn() && turn)
-next[move.newY][move.newX].setCarDirection(next[move.newY][move.newX].getTurnDirection());
-next[move.newY][move.newX].setCarVelocity(move.newVel);
-}
-cells = std::move(next);
-// Add logging for timestep, vehicle states, and spatial data
-if (logger) {
-TimestepMetrics metrics = collectTimestepMetrics(step);
-logger->logTimestep(metrics);
-// Log vehicle states and spatial data
-for (int y = 0; y < height; y++) {
-for (int x = 0; x < width; x++) {
-if (cells[y][x].hasCar()) {
-int vel = cells[y][x].getCarVelocity();
-logger->logVehicleState(cells[y][x].getCarId(), step, x, y, vel);
-logger->logSpatialData(x, y, vel);
-}
-}
-}
-}
+    std::vector<std::vector<Cell>> next(height, std::vector<Cell>(width, Cell()));
+
+    // Copy traffic lights and turns to next state
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+
+            if (cells[y][x].hasTrafficLight()) {
+                cells[y][x].updateTrafficLight();
+                next[y][x].setTrafficLight(*cells[y][x].getTrafficLight());
+            }
+
+            if (cells[y][x].hasTurn()) {
+                next[y][x].setTurn(*cells[y][x].getTurn());
+            }
+
+            if (cells[y][x].isSpawnPoint()) {
+                double willTurnProbability = calculateWillTurnProbability(x, y);
+                Direction dir = getInitialDirection(x, y);
+                double prob;
+
+                // Get per-lane spawnProbabilities
+                switch (dir) {
+                    case Direction::UP:    prob = southSpawnProb / numLanesSouthIn; break;
+                    case Direction::LEFT:  prob = eastSpawnProb / numLanesEastIn; break;
+                    case Direction::DOWN:  prob = northSpawnProb / numLanesNorthIn; break;
+                    case Direction::RIGHT: prob = westSpawnProb / numLanesWestIn; break;
+                    default:               prob = 0.0;
+                }
+
+                double r = rand() / double(RAND_MAX);
+
+                if (currentCars < maxCars && r <= prob) {
+                    next[y][x].spawnCar(vmax, willTurnProbability, nextCarId++, dir);
+
+                    if (logger) {
+                        bool willTurn = next[y][x].getCarWillTurn();
+                        logger->logVehicleSpawn(nextCarId, step, dir, willTurn);
+                    }
+
+                    currentCars++;
+                }
+
+                next[y][x].setSpawnPoint(true);
+            }
+
+            if (cells[y][x].isAlive()) {
+                next[y][x].setAlive(true);
+            }
+        }
+    }
+
+    // First pass: Calculate desired positions and velocities for all cars
+    struct CarMove {
+        int oldX, oldY;
+        int newX, newY;
+        int newVel;
+        int carId;
+        Direction dir;
+        bool willTurn;
+    };
+
+    std::vector<CarMove> moves;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+
+            if (!cells[y][x].hasCar()) continue;
+
+            Direction dir = cells[y][x].getCarDirection();
+            int dx = 0, dy = 0;
+
+            if (dir == Direction::RIGHT)      { dx = 1;  dy = 0; }
+            else if (dir == Direction::LEFT)  { dx = -1; dy = 0; }
+            else if (dir == Direction::UP)    { dx = 0;  dy = -1; }
+            else if (dir == Direction::DOWN)  { dx = 0;  dy = 1; }
+
+            // Logging update
+            cells[y][x].updateTotalVelocity();
+
+            int currentVel = cells[y][x].getCarVelocity();
+            int dist = distanceToNextCar(x, y);
+
+            // Apply NaSch rules
+            int newVel = rules.nextVelocity(currentVel, dist, vmax, p);
+
+            // Calculate new position
+            int newX = x;
+            int newY = y;
+
+            if (dx != 0) newX = x + newVel * dx;
+            if (dy != 0) newY = y + newVel * dy;
+
+            // Remove car if it leaves the grid
+            if (newX >= width || newX < 0 || newY >= height || newY < 0) {
+                int carId = cells[y][x].getCarId();
+                cells[y][x].removeCar();
+                currentCars--;
+
+                if (logger) {
+                    logger->logVehicleExit(carId, step);
+                }
+
+                continue;
+            }
+
+            moves.push_back({
+                x, y, newX, newY,
+                newVel,
+                cells[y][x].getCarId(),
+                dir,
+                cells[y][x].getCarWillTurn()
+            });
+        }
+    }
+
+    // Second pass: Apply moves
+    for (const auto& move : moves) {
+        bool turn = cells[move.oldY][move.oldX].getCarWillTurn();
+        cells[move.oldY][move.oldX].moveCarTo(next[move.newY][move.newX]);
+
+        if (next[move.newY][move.newX].hasTurn() && turn) {
+            next[move.newY][move.newX].setCarDirection(
+                next[move.newY][move.newX].getTurnDirection()
+            );
+        }
+
+        next[move.newY][move.newX].setCarVelocity(move.newVel);
+    }
+
+    cells = std::move(next);
+
+    // Logging
+    if (logger) {
+        TimestepMetrics metrics = collectTimestepMetrics(step);
+        logger->logTimestep(metrics);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (cells[y][x].hasCar()) {
+                    int vel = cells[y][x].getCarVelocity();
+                    logger->logVehicleState(cells[y][x].getCarId(), step, x, y, vel);
+                    logger->logSpatialData(x, y, vel);
+                }
+            }
+        }
+    }
 }
 
 int Grid::distanceToNextCar(int x, int y) const {
@@ -469,6 +492,7 @@ Direction Grid::getInitialDirection(int x, int y) {
     else if (x >= centerX && y > centerY) {
         return Direction::UP; // South inbound
     }
+    return Direction::LEFT;
 }
 
 double Grid::calculateWillTurnProbability(int x, int y) {
@@ -631,9 +655,6 @@ TimestepMetrics Grid::collectTimestepMetrics(int currentStep) {
     int velWest = 0, cntWest = 0;
     int stoppedCars = 0;
     int carsAtRedLight = 0;
-    
-    int centerX = width / 2;
-    int centerY = height / 2;
     
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {

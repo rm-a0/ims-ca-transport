@@ -1,8 +1,12 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Iinc
+CXXFLAGS = -o3 -std=c++17 -Iinc
 SRCDIR = src
 INCDIR = inc
 BUILDDIR = build
+VIZDIR = viz
+DATADIR = data
+SCRIPTDIR = scripts
+ZIPNAME = 
 
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 HDRS = $(wildcard $(INCDIR)/*.hpp)
@@ -22,22 +26,31 @@ $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) -s 3600
 
 clean:
 	rm -rf $(BUILDDIR) $(TARGET)
 
 runvizmp4: $(TARGET)
-	rm -rf viz/ output.gif output.mp4
 	./$(TARGET) -v
 	ffmpeg -i viz/frame_%05d.ppm -r 5 output.mp4 -y
 
 runvizgif: $(TARGET)
-	rm -rf viz/ output.mp4
 	./$(TARGET) -v
-	ffmpeg -i viz/frame_%05d.ppm -r 5 output.gif -y
+	ffmpeg -i $(VIZDIR)/frame_%05d.ppm -r 5 output.gif -y
 
 cleanviz:
-	rm -rf viz/ output.gif output.mp4
+	rm -rf $(VIZDIR) output.gif output.mp4
+
+runplot:
+	./$(TARGET) -p
+	./$(TARGET) -p -O
+	./$(SCRIPTDIR)/plot_graphs.py $(DATADIR)/baseline $(DATADIR)/modified $(DATADIR)/graphs
+
+cleanplot:
+	rm -rf $(DATADIR)
+
+zip:
+
 
 .PHONY: all run clean

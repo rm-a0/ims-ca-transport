@@ -179,6 +179,11 @@ public:
      */
     void reset();
 
+    /**
+     * @brief Print table in stdout
+     */
+    void printSummaryTable() const;
+
     // Data storage
     std::vector<TimestepMetrics> timestepData;
     std::unordered_map<int, VehicleTrajectory> vehicleData;

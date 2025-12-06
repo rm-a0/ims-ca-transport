@@ -88,7 +88,6 @@ void Logger::finalizeData() {
     
     // Finalize vehicle trajectories
     for (auto& [id, traj] : vehicleData) {
-        // If vehicle is still in system, use current step
         if (traj.exitStep == -1 && !timestepData.empty()) {
             traj.totalSteps = timestepData.back().step - traj.spawnStep;
         }
@@ -248,7 +247,7 @@ void Logger::exportSummaryStatistics(const std::string& filename) const {
     int completedVehicles = 0;
     
     for (const auto& [id, traj] : vehicleData) {
-        if (traj.exitStep > 0) {  // Only count vehicles that exited
+        if (traj.exitStep > 0) {
             avgTimeInSystem += traj.totalSteps;
             avgWaitingTime += traj.stepsAtZeroVelocity;
             completedVehicles++;
@@ -284,10 +283,7 @@ void Logger::exportSummaryStatistics(const std::string& filename) const {
 }
 
 void Logger::exportAll(const std::string& directory) const {
-    // Create directory if it doesn't exist
     std::filesystem::create_directories(directory);
-    
-    // Export all data files
     exportTimestepMetrics(directory + "/timestep_metrics.csv");
     exportVehicleTrajectories(directory + "/vehicle_trajectories.csv");
     exportSpatialHeatmap(directory + "/spatial_heatmap.csv");
@@ -310,4 +306,68 @@ std::string Logger::directionToString(Direction dir) const {
         case Direction::DOWN:  return "SOUTH";
         default:               return "UNKNOWN";
     }
+}
+
+void Logger::printSummaryTable() const {
+    if (timestepData.empty()) {
+        std::cout << "No data to display." << std::endl;
+        return;
+    }
+
+    int totalSteps = timestepData.size();
+    int totalCarsSpawned = timestepData.back().carsEntered;
+    int totalCarsExited = timestepData.back().carsExited;
+
+    double avgVelocityOverall = 0.0;
+    double avgStoppedCars = 0.0;
+    int maxQueueOverall = 0;
+
+    for (const auto& m : timestepData) {
+        avgVelocityOverall += m.avgVelocity;
+        avgStoppedCars += m.carsAtZeroVelocity;
+        maxQueueOverall = std::max({maxQueueOverall, m.maxQueueNorth,
+                                    m.maxQueueSouth, m.maxQueueEast, m.maxQueueWest});
+    }
+    avgVelocityOverall /= totalSteps;
+    avgStoppedCars /= totalSteps;
+
+    double avgTimeInSystem = 0.0;
+    double avgWaitingTime = 0.0;
+    int completedVehicles = 0;
+
+    for (const auto& [id, traj] : vehicleData) {
+        if (traj.exitStep > 0) {
+            avgTimeInSystem += traj.totalSteps;
+            avgWaitingTime += traj.stepsAtZeroVelocity;
+            completedVehicles++;
+        }
+    }
+
+    if (completedVehicles > 0) {
+        avgTimeInSystem /= completedVehicles;
+        avgWaitingTime /= completedVehicles;
+    }
+
+    double throughput = (totalCarsExited * 60.0) / totalSteps;
+
+    double completionRate = (totalCarsSpawned > 0) ? static_cast<double>(totalCarsExited) / totalCarsSpawned : 0.0;
+
+    // Print nice table
+    std::cout << "\nSimulation Summary Statistics:\n";
+    std::cout << std::string(50, '-') << std::endl;
+    std::cout << std::left << std::setw(30) << "Metric" << std::setw(20) << "Value" << std::endl;
+    std::cout << std::string(50, '-') << std::endl;
+
+    std::cout << std::left << std::setw(30) << "Total Steps (s)" << std::setw(20) << totalSteps << std::endl;
+    std::cout << std::left << std::setw(30) << "Total Cars Spawned" << std::setw(20) << totalCarsSpawned << std::endl;
+    std::cout << std::left << std::setw(30) << "Total Cars Exited" << std::setw(20) << totalCarsExited << std::endl;
+    std::cout << std::left << std::setw(30) << "Average Velocity (cell/s)" << std::fixed << std::setprecision(4) << std::setw(20) << avgVelocityOverall << std::endl;
+    std::cout << std::left << std::setw(30) << "Average Velocity (km/h)" << std::fixed << std::setprecision(4) << std::setw(20) << avgVelocityOverall*18 << std::endl;
+    std::cout << std::left << std::setw(30) << "Average Stopped Cars" << std::fixed << std::setprecision(4) << std::setw(20) << avgStoppedCars << std::endl;
+    std::cout << std::left << std::setw(30) << "Max Queue Length (cells)" << std::setw(20) << maxQueueOverall << std::endl;
+    std::cout << std::left << std::setw(30) << "Max Queue Length (m)" << std::setw(20) << maxQueueOverall*5 << std::endl;
+    std::cout << std::left << std::setw(30) << "Avg Time in System (s)" << std::fixed << std::setprecision(4) << std::setw(20) << avgTimeInSystem << std::endl;
+    std::cout << std::left << std::setw(30) << "Avg Waiting Time (s)" << std::fixed << std::setprecision(4) << std::setw(20) << avgWaitingTime << std::endl;
+    std::cout << std::left << std::setw(30) << "Throughput (veh/min)" << std::fixed << std::setprecision(4) << std::setw(20) << throughput << std::endl;
+    std::cout << std::string(50, '-') << std::endl << std::endl;
 }

@@ -34,8 +34,6 @@ int main(int argc, char* argv[]) {
     Logger logger;
     grid.setLogger(&logger);
     
-    std::cout << "Step, AvgVelocity" << std::endl;
-    
     for (int step = 0; step < parser.getSteps(); step++) {
         grid.update(rules, parser.getDensity(), parser.getVMax(), parser.getProb(), step);
         
@@ -44,6 +42,12 @@ int main(int argc, char* argv[]) {
             ss << parser.getVizDir() << "/frame_" << std::setw(5) << std::setfill('0') << step << ".ppm";
             Utils::exportPPM(grid, ss.str(), 10, parser.getVMax()); 
         }
+
+        if (step % 25 == 0 || step == parser.getSteps() - 1) {
+            logger.finalizeData();
+            logger.printSummaryTable();
+        }
+
     }
 
     if (parser.isPlotEnabled()) {
