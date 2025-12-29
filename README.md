@@ -252,8 +252,6 @@ Two configurations were compared with identical traffic demand and signal timing
 - **H2**: Queue length per lane decreases by at least 20% - **-25.0% achieved**
 - **H3**: Average vehicle speed increases - **+5.8% achieved**
 
-![Performance Metrics](doc/graphs/performance-comparison.png)
-
 ### Spatial Analysis
 
 The spatial heatmaps reveal where congestion occurs and how the modification reduces it:
