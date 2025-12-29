@@ -287,10 +287,6 @@ The spatial heatmaps reveal where congestion occurs and how the modification red
 
 ![Throughput Graph](doc/graphs/throughput_comparison.png)
 
-**Queue Length Comparison:**
-
-![Queue Length Graph](doc/graphs/queue_comparison.png)
-
 ## Conclusion
 
 The cellular automaton simulation successfully demonstrated that adding one straight lane to the eastbound approach significantly improves traffic flow at the Zvonarka–Dornych intersection during peak hours. All three hypotheses were confirmed with improvements exceeding target thresholds: throughput increased by 35.1%, queue length per lane decreased by 25.0%, and average speed increased by 5.8%. Benefits extended beyond the modified approach, improving flow throughout the entire intersection.
